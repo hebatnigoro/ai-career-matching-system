@@ -64,7 +64,12 @@ def analyze(req: AnalyzeRequest):
     career_emb = embed_texts(model, preprocessed_careers)
     student_emb = embed_texts(model, preprocessed_cvs)
 
-    sim = cosine_similarity_matrix(student_emb, career_emb)
+    sim = cosine_similarity_matrix(
+            student_embeddings=student_emb,
+            career_embeddings=career_emb,
+            student_texts=[s.cv_text for s in students],
+            career_skills=[c.skills or [] for c in careers],
+        )
 
     results = []
     for i, s in enumerate(students):
@@ -79,8 +84,7 @@ def analyze(req: AnalyzeRequest):
         ]
 
         drift = analyze_drift(
-            student_vector=student_emb[i],
-            career_vectors=career_emb,
+            sim_row=sim[i],
             career_ids=career_ids,
             declared_interest=s.declared_interest,
             thresholds={
@@ -91,12 +95,12 @@ def analyze(req: AnalyzeRequest):
         )
 
         recs = recommend_alternatives(
-            student_vector=student_emb[i],
-            career_vectors=career_emb,
+            sim_row=sim[i],
             career_ids=career_ids,
             topk=req.topk,
             min_similarity=req.min_sim,
         )
+
         recs_fmt = [
             {
                 "career_id": cid,

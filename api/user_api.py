@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 import json
 import os
+import numpy as np
 
 from src.preprocess import preprocess_batch
 from src.embedding import load_model, embed_texts
@@ -35,7 +36,8 @@ app = FastAPI(
     description=(
         "API sederhana untuk pengguna akhir: input CV (cv_text) + target karier (target_career_id). "
         "Sistem membandingkan CV dengan seluruh profil karier (repo server), menghitung similarity ke target, "
-        "mencari alternatif terbaik, menghitung advantage, mendeteksi drift, dan memberikan rekomendasi."),
+        "mencari alternatif terbaik, menghitung advantage, mendeteksi drift, dan memberikan rekomendasi."
+    ),
 )
 
 
@@ -76,53 +78,58 @@ def analyze_single_core(
     thresholds: "Thresholds" = None,
     model_name: Optional[str] = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
 ) -> Dict:
-    """Pure function that reuses existing BERT pipeline for a single CV.
-    IO-free; suitable for both JSON and file-upload endpoints.
-    """
-    # Defaults
+
     thresholds = thresholds or Thresholds()
 
-    # Validate repository and target career id
     if not _career_repo:
         raise HTTPException(status_code=500, detail="Career repository kosong atau tidak ditemukan.")
     if target_career_id not in _career_index:
         raise HTTPException(status_code=400, detail=f"target_career_id '{target_career_id}' tidak ada di repository.")
 
-    # Prepare texts and mappings
     career_ids = [c['id'] for c in _career_repo]
     career_titles = {c['id']: c.get('title', c['id']) for c in _career_repo}
     career_texts = [_career_text(c) for c in _career_repo]
 
-    # Load model (pretrained, tanpa fine-tuning)
     model_name_resolved = model_name or 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
     model = load_model(model_name_resolved)
 
-    # Preprocess
     preprocessed_careers = preprocess_batch(career_texts)
     preprocessed_cv = preprocess_batch([cv_text])
 
-    # Embeddings (L2-normalized)
     career_emb = embed_texts(model, preprocessed_careers)
     cv_emb = embed_texts(model, preprocessed_cv)[0]
 
-    # Similarity matrix untuk satu CV vs semua karier
-    sim_row = cosine_similarity_matrix(cv_emb.reshape(1, -1), career_emb)[0]
+    sim_row = cosine_similarity_matrix(
+        student_embeddings=cv_emb.reshape(1, -1),
+        career_embeddings=career_emb,
+        student_texts=[cv_text],
+        career_skills=[c.get("skills", []) for c in _career_repo],
+    )[0]
 
-    # Similarity ke target karier
+    # ---------- DISPLAY SCALING FIX ----------
+    best_score = float(np.max(sim_row))
+
+    def to_display_percent(score: float) -> float:
+        if best_score <= 1e-12:
+            return 0.0
+        return (score / best_score) * 100
+    # -----------------------------------------
+
     target_idx = career_ids.index(target_career_id)
     similarity_target = float(sim_row[target_idx])
 
-    # Ranking keseluruhan
     rankings = rank_topk(sim_row, career_ids, topk=topk)
     ranked_fmt = [
-        {"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(score, 4)}
+        {
+            "career_id": cid,
+            "title": career_titles.get(cid, cid),
+            "similarity": round(to_display_percent(score), 2)
+        }
         for cid, score in rankings
     ]
 
-    # Drift analysis dengan declared_interest = target_career_id
     drift = analyze_drift(
-        student_vector=cv_emb,
-        career_vectors=career_emb,
+        sim_row=sim_row,
         career_ids=career_ids,
         declared_interest=target_career_id,
         thresholds={
@@ -132,35 +139,36 @@ def analyze_single_core(
         }
     )
 
-    # Best alternative (dari drift)
     best_alt_id = drift.get('best_alt_id')
     best_alt_similarity = drift.get('best_alt_similarity')
     best_alt_title = career_titles.get(best_alt_id, best_alt_id) if best_alt_id else None
 
-    # Rekomendasi di atas min_sim
     recs = recommend_alternatives(
-        student_vector=cv_emb,
-        career_vectors=career_emb,
+        sim_row=sim_row,
         career_ids=career_ids,
         topk=topk,
         min_similarity=min_sim,
     )
+
     recommendations = [
-        {"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(score, 4)}
+        {
+            "career_id": cid,
+            "title": career_titles.get(cid, cid),
+            "similarity": round(to_display_percent(score), 2)
+        }
         for cid, score in recs
     ]
 
-    # Response user-facing yang sederhana (konsisten dengan /analyze_single)
     return {
         "target": {
             "career_id": target_career_id,
             "title": career_titles.get(target_career_id, target_career_id),
-            "similarity": round(similarity_target, 4),
+            "similarity": round(to_display_percent(similarity_target), 2),
         },
         "best_alternative": {
             "career_id": best_alt_id,
             "title": best_alt_title,
-            "similarity": best_alt_similarity,
+            "similarity": round(to_display_percent(best_alt_similarity), 2) if best_alt_similarity else None,
             "advantage": drift.get('advantage'),
         },
         "status": drift.get('status'),
@@ -175,6 +183,8 @@ def analyze_single_core(
         },
         "model": model_name_resolved,
     }
+
+
 # ---------- Endpoints ----------
 @app.get("/health")
 def health():
@@ -209,40 +219,28 @@ async def analyze_cv_file(
     tau_mid: float = Form(0.60),
     delta_minor: float = Form(0.08),
 ):
-    """User-facing endpoint to upload a CV file (PDF/DOCX), extract text, and reuse the
-    /analyze_single pipeline. Ensures IO (file handling) is separated from NLP logic.
-    """
-    # Read file content
+
     content = await file.read()
     if not content:
         raise HTTPException(status_code=400, detail="File kosong atau tidak dapat dibaca.")
 
-    # Extract text automatically based on content type / filename
     extracted = extract_text_auto(file.filename or "", content, getattr(file, "content_type", None))
-    # Support str, (text, source), and {"text": ...} return types
+
     if isinstance(extracted, dict):
         text = extracted.get("text", "")
     elif isinstance(extracted, (tuple, list)):
         text = extracted[0]
     else:
         text = extracted
+
     if not isinstance(text, str):
         text = str(text or "")
 
-    # Validate extraction result
-    if not text or not text.strip():
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Teks CV tidak terdeteksi dari file. Pastikan unggahan bertipe PDF/DOCX dan bukan hasil scan gambar. "
-                "Jika dokumen berupa scan, gunakan OCR terlebih dahulu."
-            ),
-        )
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="Teks CV tidak terdeteksi dari file.")
 
-    # Thresholds via form values (defaults align with AnalyzeSingleRequest)
     th = Thresholds(tau_high=tau_high, tau_mid=tau_mid, delta_minor=delta_minor)
 
-    # Reuse core logic; return structure identical to /analyze_single
     return analyze_single_core(
         cv_text=text,
         target_career_id=target_career_id,
