@@ -14,7 +14,12 @@ class Career(BaseModel):
     title: str
     description: str
     skills: Optional[List[str]] = []
-
+    
+class Hebat(BaseModel):
+    id: str
+    title: str
+    description: str
+    skills: Optional[List[str]] = []
 
 class Student(BaseModel):
     id: str
