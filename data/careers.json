@@ -1,0 +1,94 @@
+{
+  "careers": [
+    {
+      "id": "software-engineer",
+      "title": "Software Engineer",
+      "description": "Design, build, test, and operate production-grade software. Typical work includes implementing microservices and APIs, collaborating on architecture/design reviews, writing unit/integration tests, performance tuning, and incident handling. Common context: distributed systems, cloud-native apps, observability (logs/metrics/traces), and secure coding practices. Tools & frameworks often used: Java/Kotlin/Go/Python/TypeScript, Spring Boot/.NET/Node.js, Git, Docker, Kubernetes, AWS/GCP/Azure, GitHub Actions/Jenkins, Prometheus/Grafana.",
+      "skills": ["Java", "Kotlin", "Go", "Python", "TypeScript", "Spring Boot", ".NET", "Node.js", "Microservices", "Docker", "Kubernetes", "AWS", "GCP", "Azure", "CI/CD", "Testing", "Observability"]
+    },
+    {
+      "id": "backend-engineer",
+      "title": "Backend Engineer",
+      "description": "Focus on server-side systems: design REST/GraphQL APIs, data models, caching, and messaging pipelines. Responsibilities include database schema design, query optimization, securing endpoints (OAuth/JWT), and reliability (rate limiting, retries, idempotency). Typical stack: PostgreSQL/MySQL/MongoDB, Redis, Kafka/RabbitMQ, gRPC, containerized services, IaC for deployments.",
+      "skills": ["API Design", "PostgreSQL", "MySQL", "MongoDB", "Redis", "Kafka", "RabbitMQ", "gRPC", "OAuth", "JWT", "Performance", "Scalability", "Idempotency", "Containers"]
+    },
+    {
+      "id": "frontend-engineer",
+      "title": "Frontend Engineer",
+      "description": "Build accessible, performant web interfaces. Typical work: component development, state management, SSR/SSG (Next.js/Nuxt), web performance optimization, cross-browser testing, and A11y compliance. Collaborates with designers via design systems and tokens. Tools: React/Vue/Angular, TypeScript, Vite/Webpack, Jest/Playwright/Cypress.",
+      "skills": ["React", "Vue", "Angular", "TypeScript", "Next.js", "Nuxt", "CSS", "Accessibility", "Jest", "Playwright", "Cypress", "Performance"]
+    },
+    {
+      "id": "mobile-engineer",
+      "title": "Mobile Engineer",
+      "description": "Develop native or cross-platform mobile apps. Responsibilities: building UI components, offline-first data sync, push notifications, store releases, crash analytics, and performance profiling. Typical stack: Kotlin/Swift, Flutter/React Native, Firebase services, mobile CI/CD, app signing and deployment.",
+      "skills": ["Kotlin", "Swift", "Flutter", "React Native", "Firebase", "Push Notifications", "Offline Sync", "CI/CD", "Performance"]
+    },
+    {
+      "id": "data-scientist",
+      "title": "Data Scientist",
+      "description": "Plan and run experiments, perform feature engineering, train/evaluate ML models, and communicate insights to stakeholders. Context includes notebooks, reproducible pipelines, and business KPIs. Tools: Python, Pandas/NumPy, scikit-learn, PyTorch/TensorFlow, SQL, visualization (Matplotlib/Seaborn), experiment tracking (MLflow), and deployment with FastAPI.",
+      "skills": ["Python", "Pandas", "scikit-learn", "PyTorch", "TensorFlow", "SQL", "Experimentation", "Feature Engineering", "Visualization", "MLflow", "FastAPI"]
+    },
+    {
+      "id": "machine-learning-engineer",
+      "title": "Machine Learning Engineer",
+      "description": "Productionize ML: build training/inference pipelines, manage model/versioning, deploy models to scalable serving, and monitor drift/performance. Typical stack: PyTorch/TensorFlow, ONNX/Triton, Airflow, Kafka, Kubernetes, feature stores (Feast), experiment tracking (MLflow), and model monitoring.",
+      "skills": ["MLOps", "PyTorch", "TensorFlow", "ONNX", "Airflow", "Kafka", "Kubernetes", "Feast", "MLflow", "Model Serving", "Monitoring"]
+    },
+    {
+      "id": "data-analyst",
+      "title": "Data Analyst",
+      "description": "Transform data into actionable insights: write complex SQL, build dashboards, define metrics, and run A/B tests. Collaborates with product/marketing to drive decisions. Tools: Power BI/Tableau/Looker, Excel, GA4 or product analytics, and lightweight Python/R for data wrangling.",
+      "skills": ["SQL", "Power BI", "Tableau", "Looker", "Excel", "Analytics", "Dashboarding", "A/B Testing", "Storytelling"]
+    },
+    {
+      "id": "devops-engineer",
+      "title": "DevOps Engineer",
+      "description": "Own CI/CD, infrastructure automation, and reliability engineering. Responsibilities: container orchestration, IaC, secrets management, observability, and incident response. Tools: Docker, Kubernetes, Terraform, Helm, GitHub Actions/Jenkins, Prometheus/Grafana, ELK/OpenSearch.",
+      "skills": ["CI/CD", "Docker", "Kubernetes", "Terraform", "Helm", "GitHub Actions", "Jenkins", "Observability", "Prometheus", "Grafana", "ELK"]
+    },
+    {
+      "id": "cloud-engineer",
+      "title": "Cloud Engineer",
+      "description": "Design and operate cloud infrastructure across AWS/GCP/Azure. Typical work: VPC/networking, IAM security, serverless (Lambda/Cloud Functions), storage (S3/GCS), container platforms, backup/DR, and cost optimization. Uses IaC and cloud-native monitoring tools.",
+      "skills": ["AWS", "GCP", "Azure", "VPC", "IAM", "Serverless", "S3", "GCS", "Kubernetes", "Monitoring", "Cost Optimization"]
+    },
+    {
+      "id": "qa-engineer",
+      "title": "QA Engineer",
+      "description": "Ensure product quality via test strategy, automation, and non-functional testing. Responsibilities: API/UI automation, regression suites, performance tests (k6/JMeter), and defect triage. Tools: Selenium/Cypress/Playwright, Postman, k6/JMeter, TestRail/Jira.",
+      "skills": ["Test Automation", "Selenium", "Cypress", "Playwright", "API Testing", "Postman", "k6", "JMeter", "Regression", "Test Strategy"]
+    },
+    {
+      "id": "cybersecurity-analyst",
+      "title": "Cybersecurity Analyst",
+      "description": "Monitor and respond to security events: SOC operations, SIEM alerting, endpoint detection/response, vulnerability management, and incident handling. Tools: Splunk/ELK, EDR platforms, Nessus/OpenVAS, firewalls/WAF, and threat intelligence feeds.",
+      "skills": ["SOC", "SIEM", "EDR", "Incident Response", "Vulnerability Management", "Threat Intelligence", "ELK", "Splunk", "WAF"]
+    },
+    {
+      "id": "network-engineer",
+      "title": "Network Engineer",
+      "description": "Design, configure, and maintain enterprise networks. Responsibilities: routing/switching, VPNs, firewalls, QoS, and network monitoring. Tools/vendors: Cisco/Juniper/MikroTik, Fortinet/Palo Alto, SNMP/NMS, and automation via scripts.",
+      "skills": ["Routing", "Switching", "VPN", "Firewall", "QoS", "Cisco", "Juniper", "Monitoring", "Automation"]
+    },
+    {
+      "id": "product-manager",
+      "title": "Product Manager",
+      "description": "Drive product outcomes: discovery, requirements, prioritization, roadmap, and stakeholder alignment. Defines success metrics and coordinates delivery with engineering/design. Tools: Jira/Confluence, product analytics, and experimentation frameworks.",
+      "skills": ["Discovery", "Requirements", "Prioritization", "Roadmap", "Stakeholder Management", "Analytics", "Experimentation", "Jira", "Confluence"]
+    },
+    {
+      "id": "ui-ux-designer",
+      "title": "UI/UX Designer",
+      "description": "Plan and execute user-centered design: research, personas, user flows, wireframes, prototypes, and usability testing. Develop and maintain design systems and ensure accessibility. Tools: Figma, collaborative handoff to engineering, and analytics-informed iteration.",
+      "skills": ["User Research", "Personas", "Wireframing", "Prototyping", "Usability Testing", "Design Systems", "Accessibility", "Figma"]
+    },
+    {
+      "id": "digital-marketer",
+      "title": "Digital Marketer",
+      "description": "Plan and optimize omnichannel campaigns: SEO/SEM, paid ads, social/content, email/CRM, and conversion rate optimization. Responsibilities include analytics (GA4), audience segmentation, creatives testing, and automation workflows.",
+      "skills": ["SEO", "SEM", "Paid Ads", "Social Media", "Content", "Email", "CRM", "GA4", "CRO", "Automation"]
+    }
+  ]
+}

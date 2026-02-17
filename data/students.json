@@ -1,0 +1,32 @@
+{"students": [
+  {
+    "id": "stu-001",
+    "name": "Andi",
+    "cv_text": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python, Flask). Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan bisnis.",
+    "declared_interest": "data-scientist"
+  },
+  {
+    "id": "stu-002",
+    "name": "Bunga",
+    "cv_text": "Background Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+    "declared_interest": "ui-ux-designer"
+  },
+  {
+    "id": "stu-003",
+    "name": "Chan",
+    "cv_text": "Computer science student focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+    "declared_interest": "software-engineer"
+  },
+  {
+    "id": "stu-004",
+    "name": "Dewi",
+    "cv_text": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosial dan membuat konten pemasaran digital.",
+    "declared_interest": "digital-marketer"
+  },
+  {
+    "id": "stu-005",
+    "name": "Eko",
+    "cv_text": "Pengalaman sebagai asisten lab jaringan. Mengkonfigurasi router, melakukan monitoring, dan troubleshooting dasar.",
+    "declared_interest": "network-admin"
+  }
+]}
