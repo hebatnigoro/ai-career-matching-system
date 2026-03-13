@@ -4,46 +4,37 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 
 
-@lru_cache(maxsize=2)
-def load_model(model_name: str) -> SentenceTransformer:
-    """Load and cache a SentenceTransformer model.
-    For improved retrieval/ranking quality, use E5 base by default.
-    """
-    # Force E5 base for this system; ignore incoming model_name to keep API flow unchanged
-    model = SentenceTransformer("intfloat/multilingual-e5-base")
-    # Track model name for downstream formatting decisions (E5 query/passage prefixes)
-    try:
-        setattr(model, "kilocode_model_name", "intfloat/multilingual-e5-base")
-    except Exception:
-        pass
+@lru_cache(maxsize=4)
+def load_model(model_name: str = "intfloat/multilingual-e5-base") -> SentenceTransformer:
+    """Load and cache a SentenceTransformer model."""
+    model = SentenceTransformer(model_name)
+    model._loaded_model_name = model_name
     return model
 
 
-def _prefix_for_e5(texts: List[str], is_passage_hint: bool) -> List[str]:
-    """
-    Apply E5 retrieval prefixes.
-    If is_passage_hint True, use 'passage: ' else 'query: '.
-    """
-    prefix = "passage: " if is_passage_hint else "query: "
-    return [prefix + t for t in texts]
+def _is_e5_model(model: SentenceTransformer) -> bool:
+    name = getattr(model, "_loaded_model_name", "")
+    return isinstance(name, str) and "e5" in name.lower()
 
 
-def _needs_e5_prefix(model: SentenceTransformer) -> bool:
-    name = getattr(model, "kilocode_model_name", "")
-    return isinstance(name, str) and name.startswith("intfloat/multilingual-e5")
+def embed_texts(
+    model: SentenceTransformer,
+    texts: List[str],
+    is_passage: bool = False,
+) -> np.ndarray:
+    """Encode texts into L2-normalized embeddings.
 
-
-def embed_texts(model: SentenceTransformer, texts: List[str]) -> np.ndarray:
-    """Encode a list of texts into L2-normalized embeddings (numpy array).
-    For E5 models, apply query/passage prefix formatting for optimal retrieval performance.
-    Heuristic: inputs that include 'Skills:' are treated as passages (career definitions);
-    others as queries (CVs). This keeps the API analyze() flow unchanged.
+    Args:
+        model: SentenceTransformer model instance.
+        texts: List of raw text strings.
+        is_passage: If True, texts are treated as passages/documents (career profiles).
+                    If False, texts are treated as queries (CVs).
+                    Only relevant for E5 models that require query/passage prefixes.
     """
     to_encode = texts
-    if _needs_e5_prefix(model):
-        # Heuristic: careers are constructed with 'Skills:' in api/main.py
-        is_passage_hint = any("Skills:" in t for t in texts)
-        to_encode = _prefix_for_e5(texts, is_passage_hint)
+    if _is_e5_model(model):
+        prefix = "passage: " if is_passage else "query: "
+        to_encode = [prefix + t for t in texts]
 
     embeddings = model.encode(
         to_encode,

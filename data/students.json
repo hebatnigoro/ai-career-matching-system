@@ -27,6 +27,66 @@
     "id": "stu-005",
     "name": "Eko",
     "cv_text": "Pengalaman sebagai asisten lab jaringan. Mengkonfigurasi router, melakukan monitoring, dan troubleshooting dasar.",
-    "declared_interest": "network-admin"
+    "declared_interest": "network-engineer"
+  },
+  {
+    "id": "stu-006",
+    "name": "Fani",
+    "cv_text": "Lulusan Psikologi, berpengalaman magang di departemen HRD perusahaan manufaktur. Mengelola proses rekrutmen, onboarding karyawan baru, dan membantu evaluasi kinerja tahunan. Familiar dengan HRIS dan regulasi ketenagakerjaan.",
+    "declared_interest": "data-scientist"
+  },
+  {
+    "id": "stu-007",
+    "name": "Gita",
+    "cv_text": "Full-stack developer dengan pengalaman React, Next.js, dan Node.js. Membangun dashboard web responsif dan REST API untuk startup e-commerce. Pernah ikut hackathon dan memenangkan kategori best UI.",
+    "declared_interest": "mobile-engineer"
+  },
+  {
+    "id": "stu-008",
+    "name": "Hadi",
+    "cv_text": "System administrator Linux berpengalaman mengelola server on-premise dan cloud. Familiar dengan Docker, Ansible, Prometheus, Grafana, dan CI/CD pipeline menggunakan Jenkins. Pernah menangani incident production dan menyusun runbook.",
+    "declared_interest": "software-engineer"
+  },
+  {
+    "id": "stu-009",
+    "name": "Ika",
+    "cv_text": "Latar belakang manajemen pemasaran. Berpengalaman membuat campaign digital, mengelola Google Ads dan Meta Ads, serta membuat laporan performa menggunakan Google Analytics dan spreadsheet. Pernah membuat dashboard sederhana di Google Data Studio.",
+    "declared_interest": "product-manager"
+  },
+  {
+    "id": "stu-010",
+    "name": "Joko",
+    "cv_text": "QA engineer intern selama 6 bulan di perusahaan fintech. Menulis automated test menggunakan Selenium dan Cypress, melakukan API testing dengan Postman, serta menjalankan regression test secara rutin. Familiar dengan Jira dan TestRail.",
+    "declared_interest": "software-engineer"
+  },
+  {
+    "id": "stu-011",
+    "name": "Karin",
+    "cv_text": "Mahasiswa S1 Informatika dengan fokus riset di deep learning. Berpengalaman melatih model klasifikasi gambar menggunakan PyTorch, melakukan hyperparameter tuning, dan deploy model sederhana menggunakan Flask. Publikasi di seminar nasional tentang transfer learning.",
+    "declared_interest": "machine-learning-engineer"
+  },
+  {
+    "id": "stu-012",
+    "name": "Lina",
+    "cv_text": "Berpengalaman mengelola infrastruktur AWS: EC2, S3, VPC, IAM policy, dan CloudWatch monitoring. Pernah membangun arsitektur serverless dengan Lambda dan API Gateway. Familiar dengan Terraform untuk infrastructure as code.",
+    "declared_interest": "cybersecurity-analyst"
+  },
+  {
+    "id": "stu-013",
+    "name": "Made",
+    "cv_text": "Mahasiswa Desain Grafis, menguasai Adobe Illustrator dan Photoshop untuk membuat poster, banner, dan konten visual media sosial. Belum memiliki pengalaman di bidang pemrograman atau teknologi informasi.",
+    "declared_interest": "software-engineer"
+  },
+  {
+    "id": "stu-014",
+    "name": "Nanda",
+    "cv_text": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python dan SQL. Familiar dengan PostgreSQL, Redis, dan membuat API untuk reporting dashboard. Pernah magang di tim data engineering startup.",
+    "declared_interest": "data-scientist"
+  },
+  {
+    "id": "stu-015",
+    "name": "Omar",
+    "cv_text": "Mahasiswa semester akhir, pernah ikut beberapa mata kuliah pilihan dari berbagai jurusan. Sedikit pengalaman di desain web, sedikit Python, pernah bantu admin medsos organisasi kampus. Belum ada pengalaman magang atau proyek substansial.",
+    "declared_interest": "software-engineer"
   }
 ]}
