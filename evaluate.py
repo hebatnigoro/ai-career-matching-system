@@ -3,11 +3,13 @@ Evaluation & Descriptive Analysis Script for Thesis.
 
 Generates:
   1. Per-student summary table (rankings, drift status, recommendations)
-  2. Similarity distribution statistics (mean, std, min, max per career)
-  3. Drift category distribution (count per status)
-  4. Similarity heatmap (students x careers) saved as PNG
-  5. Similarity histogram saved as PNG
-  6. Studi kasus: detailed analysis for selected students
+  2. Drift category distribution
+  3. Similarity distribution statistics (raw cosine & relative score)
+  4. Inter-career similarity analysis (discrimination quality)
+  5. Expected vs Actual drift validation
+  6. Visualizations: heatmap, histogram, drift chart, inter-career heatmap, boxplot
+  7. Studi kasus per drift category
+  8. Full results exported to JSON
 
 Usage:
   python evaluate.py --cv data/students.json --careers data/careers.json
@@ -23,9 +25,10 @@ import numpy as np
 
 from src.preprocess import preprocess_batch
 from src.embedding import load_model, embed_texts
-from src.similarity import cosine_similarity_matrix, rank_topk
+from src.similarity import cosine_similarity_matrix, normalize_scores_minmax
 from src.drift import analyze_drift
 from src.recommender import recommend_alternatives
+from src.skill_gap import analyze_skill_gap
 
 
 def load_json(path: str):
@@ -47,6 +50,8 @@ def main():
     parser.add_argument('--tau-high', type=float, default=0.70)
     parser.add_argument('--tau-mid', type=float, default=0.40)
     parser.add_argument('--delta-minor', type=float, default=0.10)
+    parser.add_argument('--skill-threshold', type=float, default=0.6,
+                        help='Similarity threshold for skill gap detection')
     parser.add_argument('--output-dir', type=str, default='results',
                         help='Directory to save evaluation outputs')
     args = parser.parse_args()
@@ -61,6 +66,7 @@ def main():
 
     career_ids = [c['id'] for c in careers]
     career_titles = {c['id']: c['title'] for c in careers}
+    career_skills = {c['id']: c.get('skills', []) for c in careers}
     career_texts = [f"{c['title']}\n{c['description']}\nSkills: {', '.join(c.get('skills', []))}" for c in careers]
 
     print(f"Model: {args.model}")
@@ -78,6 +84,11 @@ def main():
 
     sim = cosine_similarity_matrix(student_emb, career_emb)
 
+    # Compute normalized scores per student
+    norm_sim = np.zeros_like(sim)
+    for i in range(len(students)):
+        norm_sim[i] = normalize_scores_minmax(sim[i])
+
     # =========================================================
     # 1. Per-Student Summary Table
     # =========================================================
@@ -93,7 +104,6 @@ def main():
         sid = student.get('id', f"stu-{i:03d}")
         declared = student.get('declared_interest')
 
-        rankings = rank_topk(sim[i], career_ids, topk=args.topk)
         drift = analyze_drift(
             student_vector=student_emb[i],
             career_vectors=career_emb,
@@ -102,8 +112,7 @@ def main():
             thresholds={'tau_high': args.tau_high, 'tau_mid': args.tau_mid, 'delta_minor': args.delta_minor},
         )
         recs = recommend_alternatives(
-            student_vector=student_emb[i],
-            career_vectors=career_emb,
+            sim_row=sim[i],
             career_ids=career_ids,
             topk=args.topk,
             min_similarity=args.min_sim,
@@ -112,29 +121,63 @@ def main():
         status = drift['status']
         all_drift_statuses.append(status)
 
+        # Skill gap analysis
+        skill_gap = None
+        if declared and declared in career_skills:
+            skill_gap = analyze_skill_gap(
+                cv_text=student['cv_text'],
+                skills=career_skills[declared],
+                model=model,
+                threshold=args.skill_threshold,
+            )
+
         declared_title = career_titles.get(declared, declared or '-')
         best_alt_title = career_titles.get(drift.get('best_alt_id', ''), '-')
 
+        # Top-1 by relative score
+        top1_idx = int(np.argmax(norm_sim[i]))
+        top1_id = career_ids[top1_idx]
+
         print(f"\n  [{sid}] {name}")
-        print(f"    Declared Interest : {declared_title} (id={declared})")
-        print(f"    Declared Sim      : {drift.get('declared_similarity', '-')}")
-        print(f"    Best Alternative  : {best_alt_title} (sim={drift.get('best_alt_similarity', '-')})")
-        print(f"    Advantage         : {drift.get('advantage', '-')}")
+        print(f"    Declared Interest : {declared_title}")
+        print(f"    Declared Score    : {drift.get('declared_relative_score', '-')}")
+        print(f"    Best Alternative  : {best_alt_title} (score={drift.get('best_alt_relative_score', '-')})")
+        print(f"    Advantage         : {drift.get('relative_advantage', '-')}")
         print(f"    Status            : {status}")
-        print(f"    Top-1 Career      : {career_titles.get(rankings[0][0], '?')} (sim={rankings[0][1]:.4f})")
+        print(f"    Top-1 Career      : {career_titles.get(top1_id, '?')} (score={norm_sim[i][top1_idx]:.4f})")
+        if skill_gap:
+            print(f"    Skill Match       : {skill_gap['match_ratio']:.0%} ({len(skill_gap['matched_skills'])}/{len(skill_gap['matched_skills'])+len(skill_gap['missing_skills'])})")
+            if skill_gap['missing_skills']:
+                missing_names = ', '.join(s['skill'] for s in skill_gap['missing_skills'][:5])
+                print(f"    Top Missing Skills: {missing_names}")
 
         all_results.append({
             "student_id": sid,
             "name": name,
             "declared_interest": declared,
-            "declared_similarity": drift.get('declared_similarity'),
+            "declared_relative_score": drift.get('declared_relative_score'),
             "best_alt_id": drift.get('best_alt_id'),
-            "best_alt_similarity": drift.get('best_alt_similarity'),
-            "advantage": drift.get('advantage'),
+            "best_alt_relative_score": drift.get('best_alt_relative_score'),
+            "relative_advantage": drift.get('relative_advantage'),
             "status": status,
             "rationale": drift.get('rationale'),
-            "rankings": [{"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(s, 4)} for cid, s in rankings],
-            "recommendations": [{"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(s, 4)} for cid, s in recs],
+            "skill_gap": skill_gap,
+            "rankings": [
+                {
+                    "career_id": cid,
+                    "title": career_titles.get(cid, cid),
+                    "score": round(float(norm_sim[i][career_ids.index(cid)]), 4),
+                }
+                for cid, _, _ in recs
+            ],
+            "recommendations": [
+                {
+                    "career_id": cid,
+                    "title": career_titles.get(cid, cid),
+                    "score": round(rel, 4),
+                }
+                for cid, _, rel in recs
+            ],
         })
 
     # =========================================================
@@ -153,108 +196,297 @@ def main():
     # 3. Statistik Distribusi Similarity
     # =========================================================
     print_separator()
-    print("\n3. STATISTIK DISTRIBUSI SIMILARITY (semua mahasiswa x semua karier)")
+    print("\n3. STATISTIK DISTRIBUSI SIMILARITY")
     print_separator()
 
-    all_sims = sim.flatten()
-    print(f"  Count   : {len(all_sims)}")
-    print(f"  Mean    : {np.mean(all_sims):.4f}")
-    print(f"  Std     : {np.std(all_sims):.4f}")
-    print(f"  Min     : {np.min(all_sims):.4f}")
-    print(f"  Max     : {np.max(all_sims):.4f}")
-    print(f"  Median  : {np.median(all_sims):.4f}")
-    print(f"  Q1 (25%): {np.percentile(all_sims, 25):.4f}")
-    print(f"  Q3 (75%): {np.percentile(all_sims, 75):.4f}")
+    all_raw = sim.flatten()
+    all_norm = norm_sim.flatten()
 
-    # Per-career statistics
-    print(f"\n  Per-Career Similarity Statistics:")
-    print(f"  {'Career':<35s} {'Mean':>7s} {'Std':>7s} {'Min':>7s} {'Max':>7s}")
-    print(f"  {'-'*35} {'-'*7} {'-'*7} {'-'*7} {'-'*7}")
+    print(f"\n  A. Raw Cosine Similarity (semua mahasiswa x semua karier):")
+    print(f"     Count   : {len(all_raw)}")
+    print(f"     Mean    : {np.mean(all_raw):.4f}")
+    print(f"     Std     : {np.std(all_raw):.4f}")
+    print(f"     Min     : {np.min(all_raw):.4f}")
+    print(f"     Max     : {np.max(all_raw):.4f}")
+    print(f"     Range   : {np.max(all_raw) - np.min(all_raw):.4f}")
+
+    print(f"\n  B. Relative Score / Normalized (semua mahasiswa x semua karier):")
+    print(f"     Mean    : {np.mean(all_norm):.4f}")
+    print(f"     Std     : {np.std(all_norm):.4f}")
+    print(f"     Median  : {np.median(all_norm):.4f}")
+    print(f"     Q1 (25%): {np.percentile(all_norm, 25):.4f}")
+    print(f"     Q3 (75%): {np.percentile(all_norm, 75):.4f}")
+
+    # Per-career statistics (relative score)
+    print(f"\n  C. Per-Career Relative Score Statistics:")
+    print(f"     {'Career':<35s} {'Mean':>7s} {'Std':>7s} {'Min':>7s} {'Max':>7s}")
+    print(f"     {'-'*35} {'-'*7} {'-'*7} {'-'*7} {'-'*7}")
     for j, cid in enumerate(career_ids):
-        col = sim[:, j]
-        print(f"  {career_titles.get(cid, cid):<35s} {np.mean(col):>7.4f} {np.std(col):>7.4f} {np.min(col):>7.4f} {np.max(col):>7.4f}")
+        col = norm_sim[:, j]
+        print(f"     {career_titles.get(cid, cid):<35s} {np.mean(col):>7.4f} {np.std(col):>7.4f} {np.min(col):>7.4f} {np.max(col):>7.4f}")
 
     # =========================================================
-    # 4. Visualizations (matplotlib)
+    # 4. Inter-Career Similarity Analysis
     # =========================================================
+    print_separator()
+    print("\n4. ANALISIS INTER-CAREER SIMILARITY")
+    print("   (Membuktikan profil karier terdiskriminasi satu sama lain)")
+    print_separator()
+
+    career_sim = cosine_similarity_matrix(career_emb, career_emb)
+
+    # Mask diagonal (self-similarity = 1.0)
+    mask = ~np.eye(len(career_ids), dtype=bool)
+    off_diag = career_sim[mask]
+
+    print(f"\n  Cosine similarity antar profil karier (tanpa diagonal):")
+    print(f"     Mean    : {np.mean(off_diag):.4f}")
+    print(f"     Std     : {np.std(off_diag):.4f}")
+    print(f"     Min     : {np.min(off_diag):.4f}")
+    print(f"     Max     : {np.max(off_diag):.4f}")
+
+    # Find most similar career pairs
+    pairs = []
+    for i in range(len(career_ids)):
+        for j in range(i + 1, len(career_ids)):
+            pairs.append((career_ids[i], career_ids[j], career_sim[i, j]))
+
+    print(f"\n  Top-5 pasangan karier PALING MIRIP (potensi overlap):")
+    pairs_sorted_desc = sorted(pairs, key=lambda x: -x[2])
+    for rank, (a, b, s) in enumerate(pairs_sorted_desc[:5], 1):
+        print(f"     {rank}. {career_titles[a]} <-> {career_titles[b]} : {s:.4f}")
+
+    print(f"\n  Top-5 pasangan karier PALING BERBEDA (diskriminasi terbaik):")
+    pairs_sorted_asc = sorted(pairs, key=lambda x: x[2])
+    for rank, (a, b, s) in enumerate(pairs_sorted_asc[:5], 1):
+        print(f"     {rank}. {career_titles[a]} <-> {career_titles[b]} : {s:.4f}")
+
+    # =========================================================
+    # 5. Expected vs Actual Drift Validation
+    # =========================================================
+    print_separator()
+    print("\n5. VALIDASI: EXPECTED vs ACTUAL DRIFT")
+    print("   (Ground truth manual berdasarkan analisis isi CV)")
+    print_separator()
+
+    # Manual ground truth based on CV content analysis
+    expected_drift = {
+        "stu-001": "Minor Drift",        # Andi: backend dev, declared data-scientist
+        "stu-002": "Aligned",            # Bunga: DKV/Figma, declared ui-ux-designer
+        "stu-003": "Aligned",            # Chan: CS/algorithms, declared software-engineer
+        "stu-004": "Aligned",            # Dewi: marketing/social media, declared digital-marketer
+        "stu-005": "Aligned",            # Eko: lab jaringan, declared network-engineer
+        "stu-006": "Major Drift",        # Fani: psikologi/HRD, declared data-scientist
+        "stu-007": "Minor Drift",        # Gita: full-stack, declared mobile-engineer
+        "stu-008": "Minor Drift",        # Hadi: sysadmin, declared software-engineer
+        "stu-009": "Minor Drift",        # Ika: marketing+SQL, declared product-manager
+        "stu-010": "Minor Drift",        # Joko: QA intern, declared software-engineer
+        "stu-011": "Aligned",            # Karin: ML research, declared ml-engineer
+        "stu-012": "Major Drift",        # Lina: AWS infra, declared cybersecurity
+        "stu-013": "Major Drift",        # Made: graphic design, declared software-engineer
+        "stu-014": "Minor Drift",        # Nanda: backend+data pipeline, declared data-scientist
+        "stu-015": "Exploration Needed",  # Omar: generalist, declared software-engineer
+    }
+
+    match_count = 0
+    total_count = 0
+    print(f"\n  {'Student':<12s} {'Name':<12s} {'Expected':<22s} {'Actual':<22s} {'Match':>5s}")
+    print(f"  {'-'*12} {'-'*12} {'-'*22} {'-'*22} {'-'*5}")
+
+    for r in all_results:
+        sid = r['student_id']
+        expected = expected_drift.get(sid)
+        actual = r['status']
+        if expected:
+            total_count += 1
+            match = expected == actual
+            if match:
+                match_count += 1
+            symbol = 'OK' if match else 'MISS'
+            print(f"  {sid:<12s} {r['name']:<12s} {expected:<22s} {actual:<22s} {symbol:>5s}")
+
+    if total_count > 0:
+        accuracy = match_count / total_count * 100
+        print(f"\n  Agreement rate: {match_count}/{total_count} ({accuracy:.1f}%)")
+        print(f"  Catatan: Expected drift ditentukan secara manual berdasarkan analisis isi CV.")
+        print(f"  Perbedaan (MISS) bukan berarti salah — bisa jadi threshold perlu penyesuaian")
+        print(f"  atau ground truth manual perlu direvisi berdasarkan semantik model.")
+
+    # =========================================================
+    # 6. Visualizations
+    # =========================================================
+    category_order = ['Aligned', 'Minor Drift', 'Major Drift', 'Exploration Needed']
+    cat_colors = {
+        'Aligned': '#2ecc71',
+        'Minor Drift': '#f39c12',
+        'Major Drift': '#e74c3c',
+        'Exploration Needed': '#95a5a6',
+    }
+
     try:
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
 
-        # 4a. Similarity Heatmap
-        fig, ax = plt.subplots(figsize=(max(12, len(career_ids) * 0.8), max(6, len(students) * 0.5)))
-        im = ax.imshow(sim, aspect='auto', cmap='YlOrRd', vmin=0, vmax=1)
+        student_names = [s.get('name', s.get('id', f'stu-{i}')) for i, s in enumerate(students)]
+        career_labels = [career_titles.get(cid, cid) for cid in career_ids]
+
+        # 6a. Relative Score Heatmap (Student x Career)
+        fig, ax = plt.subplots(figsize=(max(14, len(career_ids) * 0.9), max(6, len(students) * 0.45)))
+        im = ax.imshow(norm_sim, aspect='auto', cmap='RdYlGn', vmin=0, vmax=1)
         ax.set_xticks(range(len(career_ids)))
-        ax.set_xticklabels([career_titles.get(cid, cid) for cid in career_ids], rotation=45, ha='right', fontsize=8)
+        ax.set_xticklabels(career_labels, rotation=45, ha='right', fontsize=7)
         ax.set_yticks(range(len(students)))
-        ax.set_yticklabels([s.get('name', s.get('id', f'stu-{i}')) for i, s in enumerate(students)], fontsize=9)
+        ax.set_yticklabels(student_names, fontsize=8)
         ax.set_xlabel('Career Profile')
         ax.set_ylabel('Student')
-        ax.set_title('Cosine Similarity Heatmap (Student x Career)')
-
-        # Add text annotations
+        ax.set_title('Relative Score Heatmap (Student x Career)')
         for i in range(len(students)):
             for j in range(len(career_ids)):
-                ax.text(j, i, f"{sim[i, j]:.2f}", ha='center', va='center', fontsize=6,
-                        color='white' if sim[i, j] > 0.6 else 'black')
-
-        plt.colorbar(im, ax=ax, label='Cosine Similarity')
+                ax.text(j, i, f"{norm_sim[i, j]:.2f}", ha='center', va='center', fontsize=5,
+                        color='white' if norm_sim[i, j] > 0.7 or norm_sim[i, j] < 0.15 else 'black')
+        plt.colorbar(im, ax=ax, label='Relative Score (0-1)')
         plt.tight_layout()
-        heatmap_path = os.path.join(args.output_dir, 'similarity_heatmap.png')
+        heatmap_path = os.path.join(args.output_dir, 'relative_score_heatmap.png')
         plt.savefig(heatmap_path, dpi=150)
         plt.close()
         print(f"\n  Heatmap saved to: {heatmap_path}")
 
-        # 4b. Similarity Distribution Histogram
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.hist(all_sims, bins=30, edgecolor='black', alpha=0.7, color='steelblue')
-        ax.axvline(args.tau_high, color='green', linestyle='--', linewidth=1.5, label=f'tau_high={args.tau_high}')
-        ax.axvline(args.tau_mid, color='orange', linestyle='--', linewidth=1.5, label=f'tau_mid={args.tau_mid}')
-        ax.axvline(args.min_sim, color='red', linestyle='--', linewidth=1.5, label=f'min_sim={args.min_sim}')
-        ax.set_xlabel('Cosine Similarity')
-        ax.set_ylabel('Frequency')
-        ax.set_title('Distribution of Cosine Similarity Scores (All Student-Career Pairs)')
-        ax.legend()
+        # 6b. Inter-Career Similarity Heatmap
+        fig, ax = plt.subplots(figsize=(max(12, len(career_ids) * 0.8), max(10, len(career_ids) * 0.7)))
+        im = ax.imshow(career_sim, aspect='auto', cmap='YlOrRd', vmin=0, vmax=1)
+        ax.set_xticks(range(len(career_ids)))
+        ax.set_xticklabels(career_labels, rotation=45, ha='right', fontsize=7)
+        ax.set_yticks(range(len(career_ids)))
+        ax.set_yticklabels(career_labels, fontsize=7)
+        ax.set_title('Inter-Career Cosine Similarity')
+        for i in range(len(career_ids)):
+            for j in range(len(career_ids)):
+                ax.text(j, i, f"{career_sim[i, j]:.2f}", ha='center', va='center', fontsize=5,
+                        color='white' if career_sim[i, j] > 0.7 else 'black')
+        plt.colorbar(im, ax=ax, label='Cosine Similarity')
         plt.tight_layout()
-        hist_path = os.path.join(args.output_dir, 'similarity_histogram.png')
-        plt.savefig(hist_path, dpi=150)
+        inter_career_path = os.path.join(args.output_dir, 'inter_career_similarity.png')
+        plt.savefig(inter_career_path, dpi=150)
         plt.close()
-        print(f"  Histogram saved to: {hist_path}")
+        print(f"  Inter-career heatmap saved to: {inter_career_path}")
 
-        # 4c. Drift Category Bar Chart
+        # 6c. Relative Score Distribution per Drift Category (Boxplot)
+        drift_scores = {}
+        for r in all_results:
+            s = r['status']
+            score = r.get('declared_relative_score')
+            if score is not None:
+                drift_scores.setdefault(s, []).append(score)
+
+        if drift_scores:
+            labels = [c for c in category_order if c in drift_scores]
+            data = [drift_scores[c] for c in labels]
+
+            fig, ax = plt.subplots(figsize=(10, 6))
+            bp = ax.boxplot(data, labels=labels, patch_artist=True, widths=0.5)
+            for patch, label in zip(bp['boxes'], labels):
+                patch.set_facecolor(cat_colors.get(label, '#3498db'))
+                patch.set_alpha(0.7)
+
+            # Overlay individual points
+            for idx, (d, label) in enumerate(zip(data, labels), 1):
+                jitter = np.random.default_rng(42).normal(0, 0.04, size=len(d))
+                ax.scatter(np.full(len(d), idx) + jitter, d, alpha=0.6, s=30, zorder=3,
+                           color=cat_colors.get(label, '#3498db'), edgecolor='black', linewidth=0.5)
+
+            ax.axhline(args.tau_high, color='green', linestyle='--', alpha=0.5, label=f'tau_high={args.tau_high}')
+            ax.axhline(args.tau_mid, color='orange', linestyle='--', alpha=0.5, label=f'tau_mid={args.tau_mid}')
+            ax.set_ylabel('Declared Interest Relative Score')
+            ax.set_title('Score Distribution per Drift Category')
+            ax.legend(loc='upper right')
+            plt.tight_layout()
+            boxplot_path = os.path.join(args.output_dir, 'drift_boxplot.png')
+            plt.savefig(boxplot_path, dpi=150)
+            plt.close()
+            print(f"  Boxplot saved to: {boxplot_path}")
+
+        # 6d. Drift Category Bar Chart
         fig, ax = plt.subplots(figsize=(8, 5))
-        statuses = list(drift_counts.keys())
+        statuses = [c for c in category_order if c in drift_counts]
         counts = [drift_counts[s] for s in statuses]
-        colors = []
-        for s in statuses:
-            if 'Aligned' in s or 'Strong' in s:
-                colors.append('green')
-            elif 'Minor' in s:
-                colors.append('orange')
-            elif 'Major' in s:
-                colors.append('red')
-            elif 'Exploration' in s:
-                colors.append('gray')
-            else:
-                colors.append('steelblue')
+        colors = [cat_colors.get(s, '#3498db') for s in statuses]
         ax.barh(statuses, counts, color=colors, edgecolor='black')
-        ax.set_xlabel('Count')
-        ax.set_title('Drift Category Distribution')
-        for i, (cnt, s) in enumerate(zip(counts, statuses)):
-            ax.text(cnt + 0.1, i, str(cnt), va='center')
+        ax.set_xlabel('Jumlah Mahasiswa')
+        ax.set_title('Distribusi Kategori Drift')
+        for i, cnt in enumerate(counts):
+            ax.text(cnt + 0.1, i, str(cnt), va='center', fontweight='bold')
         plt.tight_layout()
         drift_chart_path = os.path.join(args.output_dir, 'drift_distribution.png')
         plt.savefig(drift_chart_path, dpi=150)
         plt.close()
         print(f"  Drift chart saved to: {drift_chart_path}")
 
+        # 6e. Raw vs Normalized Comparison Histogram
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        axes[0].hist(all_raw, bins=30, edgecolor='black', alpha=0.7, color='steelblue')
+        axes[0].set_xlabel('Cosine Similarity')
+        axes[0].set_ylabel('Frequency')
+        axes[0].set_title('Raw Cosine Similarity Distribution')
+        axes[0].axvline(np.mean(all_raw), color='red', linestyle='--', label=f'Mean={np.mean(all_raw):.3f}')
+        axes[0].legend()
+
+        axes[1].hist(all_norm, bins=30, edgecolor='black', alpha=0.7, color='coral')
+        axes[1].axvline(args.tau_high, color='green', linestyle='--', label=f'tau_high={args.tau_high}')
+        axes[1].axvline(args.tau_mid, color='orange', linestyle='--', label=f'tau_mid={args.tau_mid}')
+        axes[1].set_xlabel('Relative Score')
+        axes[1].set_ylabel('Frequency')
+        axes[1].set_title('Relative Score Distribution (Normalized)')
+        axes[1].legend()
+
+        plt.suptitle('Perbandingan: Raw Cosine vs Relative Score', fontsize=13)
+        plt.tight_layout()
+        compare_path = os.path.join(args.output_dir, 'raw_vs_normalized.png')
+        plt.savefig(compare_path, dpi=150)
+        plt.close()
+        print(f"  Comparison histogram saved to: {compare_path}")
+
     except ImportError:
         print("\n  [WARNING] matplotlib not installed — skipping chart generation.")
         print("  Install with: pip install matplotlib")
 
     # =========================================================
-    # 5. Export Full Results as JSON
+    # 7. Studi Kasus (one per category)
+    # =========================================================
+    print_separator()
+    print("\n7. STUDI KASUS")
+    print_separator()
+
+    case_studies = {}
+    for r in all_results:
+        s = r['status']
+        if s not in case_studies:
+            case_studies[s] = r
+
+    for status_label in category_order:
+        r = case_studies.get(status_label)
+        if not r:
+            continue
+        print(f"\n  --- {status_label}: {r['name']} ({r['student_id']}) ---")
+        print(f"  Declared interest : {career_titles.get(r['declared_interest'], r['declared_interest'])}")
+        print(f"  Declared score    : {r.get('declared_relative_score', '-')}")
+        print(f"  Best alternative  : {career_titles.get(r.get('best_alt_id', ''), '-')} "
+              f"(score={r.get('best_alt_relative_score', '-')})")
+        print(f"  Advantage         : {r.get('relative_advantage', '-')}")
+        print(f"  Rationale         : {r.get('rationale', '-')}")
+        sg = r.get('skill_gap')
+        if sg:
+            print(f"  Skill Match       : {sg['match_ratio']:.0%}")
+            if sg['matched_skills']:
+                print(f"  Matched Skills    : {', '.join(s['skill'] for s in sg['matched_skills'])}")
+            if sg['missing_skills']:
+                print(f"  Missing Skills    : {', '.join(s['skill'] for s in sg['missing_skills'])}")
+        print(f"  Top-3 Recommendations:")
+        for rank, rec in enumerate(r['recommendations'][:3], 1):
+            print(f"    {rank}. {rec['title']} (score={rec['score']})")
+
+    # =========================================================
+    # 8. Export Full Results as JSON
     # =========================================================
     export = {
         "model": args.model,
@@ -262,17 +494,40 @@ def main():
             "tau_high": args.tau_high,
             "tau_mid": args.tau_mid,
             "delta_minor": args.delta_minor,
+            "skill_threshold": args.skill_threshold,
             "min_similarity": args.min_sim,
         },
         "count_students": len(students),
         "count_careers": len(careers),
         "drift_distribution": dict(drift_counts),
         "similarity_stats": {
-            "mean": round(float(np.mean(all_sims)), 4),
-            "std": round(float(np.std(all_sims)), 4),
-            "min": round(float(np.min(all_sims)), 4),
-            "max": round(float(np.max(all_sims)), 4),
-            "median": round(float(np.median(all_sims)), 4),
+            "raw_cosine": {
+                "mean": round(float(np.mean(all_raw)), 4),
+                "std": round(float(np.std(all_raw)), 4),
+                "min": round(float(np.min(all_raw)), 4),
+                "max": round(float(np.max(all_raw)), 4),
+                "range": round(float(np.max(all_raw) - np.min(all_raw)), 4),
+            },
+            "relative_score": {
+                "mean": round(float(np.mean(all_norm)), 4),
+                "std": round(float(np.std(all_norm)), 4),
+                "median": round(float(np.median(all_norm)), 4),
+            },
+        },
+        "inter_career_similarity": {
+            "mean": round(float(np.mean(off_diag)), 4),
+            "std": round(float(np.std(off_diag)), 4),
+            "min": round(float(np.min(off_diag)), 4),
+            "max": round(float(np.max(off_diag)), 4),
+            "most_similar_pairs": [
+                {"a": career_titles[a], "b": career_titles[b], "similarity": round(float(s), 4)}
+                for a, b, s in pairs_sorted_desc[:5]
+            ],
+        },
+        "expected_vs_actual": {
+            "agreement_rate": round(match_count / total_count * 100, 1) if total_count > 0 else None,
+            "matches": match_count,
+            "total": total_count,
         },
         "results": all_results,
     }
@@ -280,34 +535,6 @@ def main():
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(export, f, ensure_ascii=False, indent=2)
     print(f"\n  Full results exported to: {json_path}")
-
-    # =========================================================
-    # 6. Studi Kasus (3 examples)
-    # =========================================================
-    print_separator()
-    print("\n4. STUDI KASUS")
-    print_separator()
-
-    # Pick one from each category if possible
-    case_studies = {}
-    for r in all_results:
-        s = r['status']
-        if s not in case_studies:
-            case_studies[s] = r
-
-    for status, r in case_studies.items():
-        print(f"\n  --- {status}: {r['name']} ({r['student_id']}) ---")
-        print(f"  CV declared interest: {career_titles.get(r['declared_interest'], r['declared_interest'])}")
-        print(f"  Declared similarity:  {r.get('declared_similarity', '-')}")
-        print(f"  Best alternative:     {career_titles.get(r.get('best_alt_id', ''), '-')} (sim={r.get('best_alt_similarity', '-')})")
-        print(f"  Advantage:            {r.get('advantage', '-')}")
-        print(f"  Rationale:            {r.get('rationale', '-')}")
-        print(f"  Top-3 Rankings:")
-        for rank, rec in enumerate(r['rankings'][:3], 1):
-            print(f"    {rank}. {rec['title']} (sim={rec['similarity']})")
-        print(f"  Recommendations:")
-        for rank, rec in enumerate(r['recommendations'][:3], 1):
-            print(f"    {rank}. {rec['title']} (sim={rec['similarity']})")
 
     print_separator()
     print(f"\nEvaluation complete. All outputs saved in: {args.output_dir}/")

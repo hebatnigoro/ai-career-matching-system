@@ -60,8 +60,19 @@ def analyze_drift(
         raw_advantage = best_alt_raw - declared_raw
         norm_advantage = best_alt_norm - declared_norm
 
+        # Check if model can discriminate at all (raw similarity range)
+        sim_range = float(np.max(raw_sims) - np.min(raw_sims))
+
         # Categorization using normalized scores
-        if declared_norm >= tau_high and norm_advantage <= delta_minor:
+        if sim_range < 0.02:
+            # Model cannot discriminate: all careers have nearly equal similarity
+            status = 'Exploration Needed'
+            rationale = (
+                f"Model tidak dapat membedakan kesesuaian CV terhadap karier manapun "
+                f"(range similarity={sim_range:.4f} < 0.02). "
+                f"Disarankan eksplorasi karier lebih lanjut atau perkaya isi CV."
+            )
+        elif declared_norm >= tau_high and norm_advantage <= delta_minor:
             status = 'Aligned'
             rationale = (
                 f"Minat yang dideklarasikan sangat sesuai "
@@ -77,13 +88,13 @@ def analyze_drift(
                 f"namun alternatif '{best_alt_id}' lebih cocok "
                 f"(norm_adv={norm_advantage:.3f} > {delta_minor})."
             )
-        elif declared_norm < tau_mid and best_alt_norm >= tau_mid:
+        elif declared_norm < tau_mid:
             status = 'Major Drift'
             rationale = (
                 f"Minat yang dideklarasikan kurang sesuai "
                 f"(relative_score={declared_norm:.3f} < {tau_mid}), "
                 f"sementara alternatif '{best_alt_id}' jauh lebih cocok "
-                f"(relative_score={best_alt_norm:.3f} >= {tau_mid})."
+                f"(relative_score={best_alt_norm:.3f})."
             )
         else:
             status = 'Exploration Needed'
