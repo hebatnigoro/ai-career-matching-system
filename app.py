@@ -7,6 +7,7 @@ from src.embedding import load_model, embed_texts
 from src.similarity import cosine_similarity_matrix, rank_topk, normalize_scores_minmax
 from src.drift import analyze_drift
 from src.recommender import recommend_alternatives
+from src.skill_gap import analyze_skill_gap
 
 
 def load_json(path: str):
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('--tau-high', type=float, default=0.70, help='High suitability threshold (normalized 0-1)')
     parser.add_argument('--tau-mid', type=float, default=0.40, help='Mid suitability threshold (normalized 0-1)')
     parser.add_argument('--delta-minor', type=float, default=0.10, help='Minor drift advantage threshold (normalized 0-1)')
+    parser.add_argument('--skill-threshold', type=float, default=0.6, help='Similarity threshold for skill gap detection')
     parser.add_argument('--output', type=str, default=None, help='Optional path to export results as JSON')
     args = parser.parse_args()
 
@@ -36,6 +38,7 @@ def main():
 
     career_ids = [c['id'] for c in careers]
     career_titles = {c['id']: c['title'] for c in careers}
+    career_skills = {c['id']: c.get('skills', []) for c in careers}
     career_texts = [f"{c['title']}\n{c['description']}\nSkills: {', '.join(c.get('skills', []))}" for c in careers]
 
     model = load_model(args.model)
@@ -89,24 +92,76 @@ def main():
         print(f"  Rationale:            {drift['rationale']}")
 
         recs = recommend_alternatives(
-            student_vector=student_emb[i],
-            career_vectors=career_emb,
+            sim_row=sim[i],
             career_ids=career_ids,
             topk=args.topk,
-            min_similarity=args.min_sim
+            min_similarity=args.min_sim,
         )
 
         print(f"\nRecommendations (min_sim={args.min_sim}):")
-        for rank, (cid, score) in enumerate(recs, start=1):
-            print(f"  {rank:2d}. {career_titles.get(cid, cid)} [id={cid}] -> similarity={score:.4f}")
+        for rank, (cid, _, rel_score) in enumerate(recs, start=1):
+            print(f"  {rank:2d}. {career_titles.get(cid, cid)} [id={cid}] -> score={rel_score:.4f}")
+
+        # Career transition context
+        top_career_id = rankings[0][0] if rankings else None
+        if top_career_id and top_career_id != declared_interest:
+            top_title = career_titles.get(top_career_id, top_career_id)
+            target_title = career_titles.get(declared_interest, declared_interest or '?')
+            print(f"\n[Career Transition Detected]")
+            print(f"  CV paling cocok untuk: {top_title} [id={top_career_id}]")
+            print(f"  Target karier kamu:    {target_title} [id={declared_interest}]")
+
+        # Skill gap analysis
+        skill_gap = None
+        if declared_interest and declared_interest in career_skills:
+            skill_gap = analyze_skill_gap(
+                cv_text=student['cv_text'],
+                skills=career_skills[declared_interest],
+                model=model,
+                threshold=args.skill_threshold,
+            )
+            print(f"\nSkill Gap (threshold={args.skill_threshold}):")
+            print(f"  Match ratio: {skill_gap['match_ratio']:.0%} ({len(skill_gap['matched_skills'])}/{len(skill_gap['matched_skills'])+len(skill_gap['missing_skills'])})")
+            if skill_gap['matched_skills']:
+                print(f"  Matched: {', '.join(s['skill'] for s in skill_gap['matched_skills'])}")
+            if skill_gap['missing_skills']:
+                upgrade = [s for s in skill_gap['missing_skills'] if s.get('type') == 'upgrade']
+                new_skills = [s for s in skill_gap['missing_skills'] if s.get('type') == 'new']
+                if upgrade:
+                    print(f"  Perlu di-upgrade ({len(upgrade)}):")
+                    for s in upgrade:
+                        print(f"    - {s['skill']} (upgrade dari: {', '.join(s.get('upgrade_from', []))})")
+                if new_skills:
+                    print(f"  Perlu dipelajari dari awal ({len(new_skills)}):")
+                    for s in new_skills:
+                        print(f"    - {s['skill']}")
+            if skill_gap.get('outdated_in_cv'):
+                print(f"\n  Skill Jadul di CV (perlu di-modernisasi):")
+                for s in skill_gap['outdated_in_cv']:
+                    print(f"    - {s['skill']} → {', '.join(s['modern_alternatives'])}")
 
         all_results.append({
             "student_id": student.get('id'),
             "name": name,
             "declared_interest": declared_interest,
-            "rankings": [{"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(s, 4)} for cid, s in rankings],
+            "rankings": [
+                {
+                    "career_id": cid,
+                    "title": career_titles.get(cid, cid),
+                    "score": round(float(norm_row[career_ids.index(cid)]), 4),
+                }
+                for cid, _ in rankings
+            ],
             "drift": drift,
-            "recommendations": [{"career_id": cid, "title": career_titles.get(cid, cid), "similarity": round(s, 4)} for cid, s in recs],
+            "skill_gap": skill_gap,
+            "recommendations": [
+                {
+                    "career_id": cid,
+                    "title": career_titles.get(cid, cid),
+                    "score": round(rel, 4),
+                }
+                for cid, _, rel in recs
+            ],
         })
 
     # Optional JSON export

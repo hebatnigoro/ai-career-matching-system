@@ -10,6 +10,7 @@ from src.embedding import load_model, embed_texts
 from src.similarity import cosine_similarity_matrix, normalize_scores_minmax
 from src.drift import analyze_drift
 from src.recommender import recommend_alternatives
+from src.skill_gap import analyze_skill_gap
 from src.file_extract import extract_text_auto
 
 
@@ -18,6 +19,7 @@ class Thresholds(BaseModel):
     tau_high: float = 0.70
     tau_mid: float = 0.40
     delta_minor: float = 0.10
+    skill_threshold: float = 0.6
 
 
 class AnalyzeSingleRequest(BaseModel):
@@ -180,19 +182,91 @@ def analyze_single_core(
     best_alt_id = drift.get('best_alt_id')
     best_alt_title = _career_titles.get(best_alt_id, best_alt_id) if best_alt_id else None
 
-    # Recommendations: top-k by relative_score, filtered by min_sim on raw cosine
-    rec_indices = np.argsort(-norm_row)
-    recommendations = []
-    for idx in rec_indices:
-        if float(sim_row[idx]) < min_sim:
-            continue
-        recommendations.append({
-            "career_id": _career_ids[idx],
-            "title": _career_titles.get(_career_ids[idx], _career_ids[idx]),
-            "score": round(float(norm_row[idx]), 4),
-        })
-        if len(recommendations) >= topk:
-            break
+    # Recommendations via shared recommender module
+    recs = recommend_alternatives(
+        sim_row=sim_row,
+        career_ids=_career_ids,
+        topk=topk,
+        min_similarity=min_sim,
+    )
+    recommendations = [
+        {
+            "career_id": cid,
+            "title": _career_titles.get(cid, cid),
+            "score": round(rel, 4),
+        }
+        for cid, _, rel in recs
+    ]
+
+    # Skill gap analysis
+    target_skills = _career_index.get(target_career_id, {}).get('skills', [])
+    skill_gap = analyze_skill_gap(
+        cv_text=cv_text,
+        skills=target_skills,
+        model=model,
+        threshold=thresholds.skill_threshold,
+    )
+
+    # Career transition context: jika karier terkuat CV berbeda dari target
+    top_career_idx = int(np.argmax(norm_row))
+    top_career_id = _career_ids[top_career_idx]
+    transition_context = None
+    if top_career_id != target_career_id:
+        top_title = _career_titles.get(top_career_id, top_career_id)
+        target_title = _career_titles.get(target_career_id, target_career_id)
+        top_score = round(float(norm_row[top_career_idx]), 4)
+        target_score = round(float(norm_row[target_idx]), 4)
+        score_gap = round(top_score - target_score, 4)
+
+        n_matched = len(skill_gap.get("matched_skills", []))
+        n_missing = len(skill_gap.get("missing_skills", []))
+        n_total = n_matched + n_missing
+        n_upgrade = sum(1 for s in skill_gap.get("missing_skills", []) if s.get("type") == "upgrade")
+        n_new = n_missing - n_upgrade
+
+        if n_missing == 0 and n_total > 0:
+            summary = (
+                f"CV kamu lebih kuat di '{top_title}' (skor {top_score:.0%}), namun sudah match "
+                f"{n_matched}/{n_total} skill untuk '{target_title}' (skor {target_score:.0%}). "
+                f"Skill teknis sudah mencukupi — perkuat portofolio proyek nyata di bidang "
+                f"{target_title} untuk membuktikan kompetensi ke rekruter."
+            )
+        elif n_missing > 0:
+            parts = []
+            if n_upgrade:
+                parts.append(f"{n_upgrade} skill bisa di-upgrade dari skill yang sudah dimiliki")
+            if n_new:
+                parts.append(f"{n_new} skill perlu dipelajari dari awal")
+            detail = " dan ".join(parts)
+            summary = (
+                f"CV kamu lebih kuat di '{top_title}' (skor {top_score:.0%}). "
+                f"Untuk transisi ke '{target_title}' (skor saat ini {target_score:.0%}), "
+                f"terdapat {n_missing} skill yang perlu diisi dari total {n_total} skill: {detail}."
+            )
+        else:
+            summary = (
+                f"CV kamu lebih kuat di '{top_title}' (skor {top_score:.0%}) "
+                f"dibanding '{target_title}' (skor {target_score:.0%})."
+            )
+
+        transition_context = {
+            "from_career_id": top_career_id,
+            "from_career_title": top_title,
+            "from_career_score": top_score,
+            "to_career_id": target_career_id,
+            "to_career_title": target_title,
+            "to_career_score": target_score,
+            "score_gap": score_gap,
+            "skill_match": {
+                "matched": n_matched,
+                "missing": n_missing,
+                "total": n_total,
+                "upgrade": n_upgrade,
+                "new": n_new,
+                "match_ratio": round(n_matched / n_total, 4) if n_total else 0.0,
+            },
+            "summary": summary,
+        }
 
     return {
         "target": {
@@ -208,12 +282,15 @@ def analyze_single_core(
         },
         "status": drift.get('status'),
         "rationale": drift.get('rationale'),
+        "transition_context": transition_context,
+        "skill_gap": skill_gap,
         "rankings": ranked_fmt,
         "recommendations": recommendations,
         "thresholds": {
             "tau_high": thresholds.tau_high,
             "tau_mid": thresholds.tau_mid,
             "delta_minor": thresholds.delta_minor,
+            "skill_threshold": thresholds.skill_threshold,
         },
         "model": model_name,
     }
@@ -258,6 +335,7 @@ async def analyze_cv_file(
     tau_high: float = Form(0.70),
     tau_mid: float = Form(0.40),
     delta_minor: float = Form(0.10),
+    skill_threshold: float = Form(0.6),
 ):
     """Analisis CV dari file upload (PDF/DOCX) terhadap target karier."""
     content = await file.read()
@@ -283,7 +361,7 @@ async def analyze_cv_file(
             ),
         )
 
-    th = Thresholds(tau_high=tau_high, tau_mid=tau_mid, delta_minor=delta_minor)
+    th = Thresholds(tau_high=tau_high, tau_mid=tau_mid, delta_minor=delta_minor, skill_threshold=skill_threshold)
 
     return analyze_single_core(
         cv_text=text,
@@ -303,6 +381,7 @@ def analyze_batch(req: AnalyzeBatchRequest):
 
     career_ids = [c.id for c in careers]
     career_titles = {c.id: c.title for c in careers}
+    career_skills = {c.id: c.skills or [] for c in careers}
     career_texts = [
         f"{c.title}\n{c.description}\nSkills: {', '.join(c.skills or [])}"
         for c in careers
@@ -348,8 +427,7 @@ def analyze_batch(req: AnalyzeBatchRequest):
             )
 
         recs = recommend_alternatives(
-            student_vector=student_emb[i],
-            career_vectors=career_emb,
+            sim_row=sim[i],
             career_ids=career_ids,
             topk=req.topk,
             min_similarity=req.min_sim,
@@ -358,10 +436,82 @@ def analyze_batch(req: AnalyzeBatchRequest):
             {
                 "career_id": cid,
                 "title": career_titles.get(cid, cid),
-                "score": round(float(norm_row[career_ids.index(cid)]), 4),
+                "score": round(rel, 4),
             }
-            for cid, score in recs
+            for cid, _, rel in recs
         ]
+
+        # Skill gap analysis
+        skill_gap = None
+        if s.declared_interest and s.declared_interest in career_skills:
+            skill_gap = analyze_skill_gap(
+                cv_text=s.cv_text,
+                skills=career_skills[s.declared_interest],
+                model=model,
+                threshold=req.thresholds.skill_threshold,
+            )
+
+        # Career transition context
+        norm_row_i = normalize_scores_minmax(sim[i])
+        top_career_idx = int(np.argmax(norm_row_i))
+        top_career_id = career_ids[top_career_idx]
+        transition_context = None
+        if s.declared_interest and top_career_id != s.declared_interest and skill_gap:
+            top_title = career_titles.get(top_career_id, top_career_id)
+            target_title = career_titles.get(s.declared_interest, s.declared_interest)
+            top_score = round(float(norm_row_i[top_career_idx]), 4)
+            target_idx_b = career_ids.index(s.declared_interest)
+            target_score = round(float(norm_row_i[target_idx_b]), 4)
+            score_gap = round(top_score - target_score, 4)
+
+            n_matched = len(skill_gap.get("matched_skills", []))
+            n_missing = len(skill_gap.get("missing_skills", []))
+            n_total = n_matched + n_missing
+            n_upgrade = sum(1 for sk in skill_gap.get("missing_skills", []) if sk.get("type") == "upgrade")
+            n_new = n_missing - n_upgrade
+
+            if n_missing == 0 and n_total > 0:
+                summary = (
+                    f"CV lebih kuat di '{top_title}' (skor {top_score:.0%}), namun sudah match "
+                    f"{n_matched}/{n_total} skill untuk '{target_title}' (skor {target_score:.0%}). "
+                    f"Perkuat portofolio proyek nyata di bidang {target_title}."
+                )
+            elif n_missing > 0:
+                parts = []
+                if n_upgrade:
+                    parts.append(f"{n_upgrade} bisa di-upgrade")
+                if n_new:
+                    parts.append(f"{n_new} perlu dipelajari dari awal")
+                detail = " dan ".join(parts)
+                summary = (
+                    f"CV lebih kuat di '{top_title}' (skor {top_score:.0%}). "
+                    f"Untuk transisi ke '{target_title}' (skor {target_score:.0%}), "
+                    f"terdapat {n_missing} skill gap dari {n_total} skill: {detail}."
+                )
+            else:
+                summary = (
+                    f"CV lebih kuat di '{top_title}' (skor {top_score:.0%}) "
+                    f"dibanding '{target_title}' (skor {target_score:.0%})."
+                )
+
+            transition_context = {
+                "from_career_id": top_career_id,
+                "from_career_title": top_title,
+                "from_career_score": top_score,
+                "to_career_id": s.declared_interest,
+                "to_career_title": target_title,
+                "to_career_score": target_score,
+                "score_gap": score_gap,
+                "skill_match": {
+                    "matched": n_matched,
+                    "missing": n_missing,
+                    "total": n_total,
+                    "upgrade": n_upgrade,
+                    "new": n_new,
+                    "match_ratio": round(n_matched / n_total, 4) if n_total else 0.0,
+                },
+                "summary": summary,
+            }
 
         results.append({
             "student_id": s.id,
@@ -369,6 +519,8 @@ def analyze_batch(req: AnalyzeBatchRequest):
             "declared_interest": s.declared_interest,
             "rankings": ranked,
             "drift": drift,
+            "transition_context": transition_context,
+            "skill_gap": skill_gap,
             "recommendations": recs_fmt,
         })
 
@@ -378,6 +530,7 @@ def analyze_batch(req: AnalyzeBatchRequest):
             "tau_high": req.thresholds.tau_high,
             "tau_mid": req.thresholds.tau_mid,
             "delta_minor": req.thresholds.delta_minor,
+            "skill_threshold": req.thresholds.skill_threshold,
             "min_similarity": req.min_sim,
         },
         "count_students": len(students),
