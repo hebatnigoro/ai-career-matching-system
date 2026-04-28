@@ -8,11 +8,22 @@ from src.similarity import cosine_similarity_matrix, rank_topk, normalize_scores
 from src.drift import analyze_drift
 from src.recommender import recommend_alternatives
 from src.skill_gap import analyze_skill_gap
+from src.ai_planner import generate_career_plan
 
 
 def load_json(path: str):
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+
+def flatten_careers(doc: Dict) -> List[Dict]:
+    if isinstance(doc, dict) and 'fields' in doc:
+        flat: List[Dict] = []
+        for field in doc['fields']:
+            for c in field.get('careers', []):
+                flat.append({**c, 'field': field.get('name')})
+        return flat
+    return doc.get('careers', doc) if isinstance(doc, dict) else doc
 
 
 def main():
@@ -28,16 +39,19 @@ def main():
     parser.add_argument('--delta-minor', type=float, default=0.10, help='Minor drift advantage threshold (normalized 0-1)')
     parser.add_argument('--skill-threshold', type=float, default=0.6, help='Similarity threshold for skill gap detection')
     parser.add_argument('--output', type=str, default=None, help='Optional path to export results as JSON')
+    parser.add_argument('--ai-plan', action='store_true',
+                        help='Generate interview & learning plan via Gemini (requires GEMINI_API_KEY env var)')
     args = parser.parse_args()
 
     students_doc: Dict = load_json(args.cv)
     careers_doc: Dict = load_json(args.careers)
 
     students: List[Dict] = students_doc.get('students', students_doc)
-    careers: List[Dict] = careers_doc.get('careers', careers_doc)
+    careers: List[Dict] = flatten_careers(careers_doc)
 
     career_ids = [c['id'] for c in careers]
     career_titles = {c['id']: c['title'] for c in careers}
+    career_fields = {c['id']: c.get('field') for c in careers}
     career_skills = {c['id']: c.get('skills', []) for c in careers}
     career_texts = [f"{c['title']}\n{c['description']}\nSkills: {', '.join(c.get('skills', []))}" for c in careers]
 
@@ -69,7 +83,8 @@ def main():
         print("\nTop-K Career Rankings:")
         for rank, (cid, score) in enumerate(rankings, start=1):
             rel = float(norm_row[career_ids.index(cid)])
-            print(f"  {rank:2d}. {career_titles.get(cid, cid)} [id={cid}] -> sim={score:.4f}  relative={rel:.4f}")
+            field_tag = f" [{career_fields.get(cid)}]" if career_fields.get(cid) else ""
+            print(f"  {rank:2d}. {career_titles.get(cid, cid)}{field_tag} [id={cid}] -> sim={score:.4f}  relative={rel:.4f}")
 
         drift = analyze_drift(
             student_vector=student_emb[i],
@@ -100,7 +115,8 @@ def main():
 
         print(f"\nRecommendations (min_sim={args.min_sim}):")
         for rank, (cid, _, rel_score) in enumerate(recs, start=1):
-            print(f"  {rank:2d}. {career_titles.get(cid, cid)} [id={cid}] -> score={rel_score:.4f}")
+            field_tag = f" [{career_fields.get(cid)}]" if career_fields.get(cid) else ""
+            print(f"  {rank:2d}. {career_titles.get(cid, cid)}{field_tag} [id={cid}] -> score={rel_score:.4f}")
 
         # Career transition context
         top_career_id = rankings[0][0] if rankings else None
@@ -140,14 +156,16 @@ def main():
                 for s in skill_gap['outdated_in_cv']:
                     print(f"    - {s['skill']} → {', '.join(s['modern_alternatives'])}")
 
-        all_results.append({
+        student_record = {
             "student_id": student.get('id'),
             "name": name,
             "declared_interest": declared_interest,
+            "declared_interest_field": career_fields.get(declared_interest) if declared_interest else None,
             "rankings": [
                 {
                     "career_id": cid,
                     "title": career_titles.get(cid, cid),
+                    "field": career_fields.get(cid),
                     "score": round(float(norm_row[career_ids.index(cid)]), 4),
                 }
                 for cid, _ in rankings
@@ -158,11 +176,46 @@ def main():
                 {
                     "career_id": cid,
                     "title": career_titles.get(cid, cid),
+                    "field": career_fields.get(cid),
                     "score": round(rel, 4),
                 }
                 for cid, _, rel in recs
             ],
-        })
+        }
+
+        if args.ai_plan:
+            ai_payload = {
+                "target": {
+                    "career_id": declared_interest,
+                    "title": career_titles.get(declared_interest, declared_interest),
+                    "field": career_fields.get(declared_interest) if declared_interest else None,
+                    "score": round(float(norm_row[career_ids.index(declared_interest)]), 4)
+                        if declared_interest and declared_interest in career_ids else None,
+                },
+                "best_alternative": {
+                    "career_id": drift.get("best_alt_id"),
+                    "title": career_titles.get(drift.get("best_alt_id"), drift.get("best_alt_id")),
+                    "field": career_fields.get(drift.get("best_alt_id")),
+                    "score": drift.get("best_alt_relative_score"),
+                },
+                "status": drift.get("status"),
+                "rationale": drift.get("rationale"),
+                "rankings": student_record["rankings"],
+                "recommendations": student_record["recommendations"],
+                "skill_gap": skill_gap,
+            }
+            plan = generate_career_plan(ai_payload)
+            student_record["ai_plan"] = plan
+            if "text" in plan:
+                print(f"\n=== AI Plan (Gemini) ===\n{plan['text']}")
+                if plan.get("sources"):
+                    print("\nSumber:")
+                    for s in plan["sources"]:
+                        print(f"  - {s.get('title') or s.get('uri')}: {s.get('uri')}")
+            elif "error" in plan:
+                print(f"\n[AI Plan error] {plan['error']}")
+
+        all_results.append(student_record)
 
     # Optional JSON export
     if args.output:

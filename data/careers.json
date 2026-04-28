@@ -1,100 +1,105 @@
 {
-  "careers": [
+  "fields": [
     {
-      "id": "software-engineer",
-      "title": "Software Engineer",
-      "description": "Merancang arsitektur perangkat lunak berskala besar menggunakan prinsip SOLID dan design patterns seperti Repository, Factory, dan Observer. Menulis kode dalam bahasa pemrograman seperti Java, Go, Python, atau TypeScript untuk membangun microservices yang berkomunikasi melalui REST API dan gRPC. Mengimplementasikan algoritma dan struktur data untuk optimasi performa sistem. Melakukan code review, menulis unit test dan integration test, serta mengelola version control dengan Git. Bekerja dengan Docker container, CI/CD pipeline, dan deployment ke cloud. Debugging, profiling, dan refactoring kode legacy menjadi arsitektur yang lebih maintainable.",
-      "skills": ["System Architecture", "Design Patterns", "SOLID Principles", "Microservices", "REST API", "gRPC", "Git", "Unit Testing", "Integration Testing", "Code Review", "Docker", "CI/CD", "Algorithms", "Data Structures", "TypeScript", "Go", "Java", "Python", "Debugging", "Refactoring"]
-    },
-    {
-      "id": "backend-engineer",
-      "title": "Backend Engineer",
-      "description": "Membangun dan mengoptimalkan server-side application menggunakan Node.js, Express, atau framework backend lainnya. Mendesain skema database relasional dengan PostgreSQL atau MySQL, menulis query SQL yang efisien, membuat database index, dan menerapkan migration strategy. Mengimplementasikan RESTful API endpoints dengan validasi request, error handling, dan pagination. Mengelola autentikasi menggunakan OAuth2, JWT token, dan session management. Mengkonfigurasi caching layer dengan Redis, message queue dengan RabbitMQ atau Kafka, dan rate limiting untuk menangani high-traffic. Menulis ORM queries, mengoptimalkan N+1 query problems, dan memastikan data consistency dengan transaction management.",
-      "skills": ["Node.js", "Express", "PostgreSQL", "MySQL", "SQL Query Optimization", "Database Indexing", "REST API", "OAuth2", "JWT", "Redis", "RabbitMQ", "Kafka", "Rate Limiting", "Caching", "ORM", "Transaction Management", "Error Handling", "Migration Strategy"]
-    },
-    {
-      "id": "frontend-engineer",
-      "title": "Frontend Engineer",
-      "description": "Mengembangkan antarmuka web interaktif menggunakan React.js, Vue.js, atau Angular dengan TypeScript. Membangun komponen UI reusable, mengelola state management dengan Redux atau Zustand, dan mengoptimasi rendering performance melalui memoization dan lazy loading. Mengimplementasikan responsive design dengan CSS Grid, Flexbox, dan media queries untuk berbagai ukuran layar. Menangani client-side routing, form validation, dan integrasi dengan REST API melalui fetch atau Axios. Memastikan aksesibilitas (WCAG compliance), SEO-friendly markup dengan SSR/SSG via Next.js, dan cross-browser compatibility. Menulis end-to-end test dengan Cypress atau Playwright.",
-      "skills": ["React.js", "Vue.js", "Angular", "TypeScript", "HTML5", "CSS3", "Responsive Design", "State Management", "Redux", "Next.js", "Webpack", "Vite", "Accessibility", "SSR", "SSG", "Cypress", "Playwright", "REST API Integration", "Component Architecture"]
-    },
-    {
-      "id": "mobile-engineer",
-      "title": "Mobile Engineer",
-      "description": "Mengembangkan aplikasi mobile native untuk Android menggunakan Kotlin dan Android SDK, atau iOS menggunakan Swift dan UIKit/SwiftUI. Alternatifnya, membangun aplikasi cross-platform dengan Flutter (Dart) atau React Native. Mengimplementasikan navigasi layar, gesture handling, local storage dengan SQLite atau Room database, dan offline-first architecture. Mengelola push notification via Firebase Cloud Messaging, integrasi kamera dan sensor perangkat, serta secure storage untuk credential. Mengoptimasi battery consumption, memory usage, dan app startup time. Melakukan build, signing, dan deployment ke Google Play Store atau Apple App Store melalui mobile CI/CD pipeline.",
-      "skills": ["Kotlin", "Swift", "Flutter", "Dart", "React Native", "Android SDK", "iOS SDK", "SQLite", "Room Database", "Firebase", "Push Notifications", "App Store Deployment", "Google Play", "Mobile UI", "Offline Storage", "Camera Integration", "Performance Profiling"]
-    },
-    {
-      "id": "data-scientist",
-      "title": "Data Scientist",
-      "description": "Melakukan analisis statistik dan eksplorasi data (EDA) menggunakan Python, Pandas, dan NumPy untuk menemukan pola dan insight dari dataset. Membangun model machine learning untuk klasifikasi, regresi, dan clustering menggunakan scikit-learn. Melakukan feature engineering, encoding categorical variables, handling missing values, dan normalisasi data. Mengevaluasi model dengan metrik seperti accuracy, precision, recall, F1-score, dan AUC-ROC. Menjalankan A/B testing dan hypothesis testing (t-test, chi-square) untuk memvalidasi keputusan bisnis. Membuat visualisasi data dengan matplotlib, seaborn, atau Plotly untuk mempresentasikan temuan kepada stakeholders non-teknis. Bekerja dengan Jupyter Notebook untuk eksperimen iteratif.",
-      "skills": ["Python", "Pandas", "NumPy", "scikit-learn", "Statistics", "Hypothesis Testing", "EDA", "Feature Engineering", "Classification", "Regression", "Clustering", "A/B Testing", "Data Visualization", "matplotlib", "Jupyter Notebook", "SQL", "Model Evaluation"]
-    },
-    {
-      "id": "machine-learning-engineer",
-      "title": "Machine Learning Engineer",
-      "description": "Membangun dan men-deploy model deep learning ke production menggunakan PyTorch atau TensorFlow. Mendesain neural network architecture (CNN, RNN, Transformer), menulis training loop, mengkonfigurasi hyperparameter tuning, dan mengelola eksperimen dengan MLflow atau Weights & Biases. Mengoptimasi model untuk inference dengan teknik quantization, pruning, dan konversi ke ONNX format. Membangun training pipeline otomatis dengan Airflow atau Kubeflow, mengelola dataset versioning dengan DVC, dan men-deploy model sebagai REST API inference service. Memonitor model drift dan data drift di production menggunakan tools seperti Evidently atau Seldon.",
-      "skills": ["PyTorch", "TensorFlow", "Deep Learning", "CNN", "RNN", "Transformer", "Training Pipeline", "Hyperparameter Tuning", "MLflow", "ONNX", "Model Serving", "MLOps", "Airflow", "Kubeflow", "DVC", "GPU Computing", "Model Optimization", "Quantization"]
-    },
-    {
-      "id": "data-analyst",
-      "title": "Data Analyst",
-      "description": "Menulis query SQL kompleks (JOIN, subquery, window functions, CTE) untuk mengekstrak data dari data warehouse. Membangun dashboard interaktif dan laporan bisnis menggunakan Power BI, Tableau, atau Google Data Studio untuk memvisualisasikan KPI dan metrik performa. Melakukan analisis cohort, funnel analysis, dan segmentasi pelanggan untuk mendukung keputusan pemasaran dan produk. Mengolah data di spreadsheet (Excel, Google Sheets) dengan pivot table, VLOOKUP, dan formula statistik. Membuat presentasi temuan data kepada tim non-teknis dengan storytelling yang jelas. Sesekali menggunakan Python atau R untuk data cleaning dan analisis sederhana.",
-      "skills": ["SQL", "Power BI", "Tableau", "Google Data Studio", "Excel", "Pivot Table", "Dashboard", "KPI Reporting", "Cohort Analysis", "Funnel Analysis", "Data Storytelling", "Google Sheets", "Window Functions", "CTE"]
-    },
-    {
-      "id": "devops-engineer",
-      "title": "DevOps Engineer",
-      "description": "Mengelola infrastruktur server dan deployment pipeline secara otomatis. Menulis konfigurasi Docker container dan Docker Compose untuk environment development dan production. Mengorkestrasi container dengan Kubernetes, menulis Helm charts, dan mengelola cluster scaling. Membangun CI/CD pipeline menggunakan GitHub Actions, Jenkins, atau GitLab CI untuk automated build, test, dan deployment. Mengimplementasikan Infrastructure as Code (IaC) dengan Terraform atau Ansible untuk provisioning server. Mengkonfigurasi monitoring dan alerting dengan Prometheus dan Grafana, serta centralized logging dengan ELK Stack. Menangani incident response, rollback deployment, dan disaster recovery.",
-      "skills": ["Docker", "Kubernetes", "Helm", "Terraform", "Ansible", "CI/CD", "GitHub Actions", "Jenkins", "Prometheus", "Grafana", "ELK Stack", "Infrastructure as Code", "Container Orchestration", "Linux Administration", "Shell Scripting", "Incident Response"]
-    },
-    {
-      "id": "cloud-engineer",
-      "title": "Cloud Engineer",
-      "description": "Merancang dan mengelola infrastruktur cloud di platform AWS, GCP, atau Azure. Mengkonfigurasi jaringan virtual (VPC, subnet, security group), IAM policy dan role-based access control, serta encrypted storage (S3, GCS, Azure Blob). Membangun arsitektur serverless menggunakan AWS Lambda, API Gateway, dan DynamoDB. Mengelola container platform (ECS, EKS, GKE), auto-scaling group, dan load balancer. Mengimplementasikan backup strategy, disaster recovery plan, dan multi-region deployment. Melakukan cost optimization dengan reserved instances, spot instances, dan resource tagging. Memonitor cloud resources dengan CloudWatch, Cloud Monitoring, atau Datadog.",
-      "skills": ["AWS", "GCP", "Azure", "VPC", "IAM", "S3", "Lambda", "Serverless", "ECS", "EKS", "GKE", "Load Balancer", "Auto Scaling", "CloudWatch", "Terraform", "Cost Optimization", "Disaster Recovery", "Multi-Region"]
-    },
-    {
-      "id": "qa-engineer",
-      "title": "QA Engineer",
-      "description": "Menjamin kualitas perangkat lunak melalui perencanaan test strategy dan eksekusi pengujian. Menulis automated test script untuk UI testing menggunakan Selenium atau Cypress, dan API testing menggunakan Postman atau RestAssured. Mendesain test case, test scenario, dan test data berdasarkan requirement specification. Menjalankan regression testing, smoke testing, dan sanity testing pada setiap release cycle. Melakukan performance testing dan load testing menggunakan k6 atau JMeter untuk mengukur response time dan throughput. Melaporkan bug dengan detail reproduksi di Jira atau TestRail, melakukan defect triage, dan memverifikasi bug fix. Berpartisipasi dalam sprint review untuk memvalidasi acceptance criteria.",
-      "skills": ["Test Automation", "Selenium", "Cypress", "Postman", "API Testing", "Test Case Design", "Regression Testing", "Performance Testing", "k6", "JMeter", "Bug Reporting", "Jira", "TestRail", "Smoke Testing", "Load Testing", "Test Strategy"]
-    },
-    {
-      "id": "cybersecurity-analyst",
-      "title": "Cybersecurity Analyst",
-      "description": "Memantau ancaman keamanan siber melalui Security Operations Center (SOC) dan menganalisis alert dari SIEM (Splunk, QRadar, atau ELK). Melakukan investigasi insiden keamanan, analisis malware, dan forensik digital untuk mengidentifikasi attack vector dan indicator of compromise (IoC). Menjalankan vulnerability scanning menggunakan Nessus atau OpenVAS dan melakukan penetration testing dasar. Mengkonfigurasi firewall rules, WAF policy, dan endpoint detection and response (EDR). Menyusun incident response playbook dan menangani eskalasi insiden. Memastikan kepatuhan terhadap standar keamanan seperti ISO 27001, NIST framework, dan OWASP Top 10. Mengelola threat intelligence feeds untuk deteksi ancaman proaktif.",
-      "skills": ["SOC", "SIEM", "Splunk", "Incident Response", "Vulnerability Scanning", "Nessus", "Penetration Testing", "Firewall", "WAF", "EDR", "Forensic Analysis", "Malware Analysis", "ISO 27001", "NIST", "OWASP", "Threat Intelligence"]
-    },
-    {
-      "id": "network-engineer",
-      "title": "Network Engineer",
-      "description": "Merancang dan mengelola infrastruktur jaringan enterprise meliputi konfigurasi router, switch, dan access point. Mengimplementasikan routing protocol (OSPF, BGP, EIGRP) dan switching technology (VLAN, STP, EtherChannel). Mengkonfigurasi VPN site-to-site dan remote access, firewall Fortinet atau Palo Alto, serta QoS policy untuk traffic prioritization. Melakukan network monitoring menggunakan SNMP, Nagios, atau PRTG, dan troubleshooting konektivitas dengan tools seperti Wireshark, traceroute, dan ping. Mengelola IP address management (IPAM), DHCP, DNS, dan wireless LAN controller. Vendor utama: Cisco, Juniper, MikroTik. Sertifikasi relevan: CCNA, CCNP.",
-      "skills": ["Routing", "Switching", "OSPF", "BGP", "VLAN", "VPN", "Firewall", "QoS", "Cisco", "Juniper", "MikroTik", "Wireshark", "SNMP", "Network Monitoring", "DHCP", "DNS", "Troubleshooting", "CCNA"]
-    },
-    {
-      "id": "product-manager",
-      "title": "Product Manager",
-      "description": "Mengelola siklus hidup produk digital dari ideation hingga launch. Melakukan user research dan market research untuk memahami kebutuhan pelanggan dan competitive landscape. Menulis Product Requirements Document (PRD), mendefinisikan user stories dan acceptance criteria, serta memprioritaskan product backlog menggunakan framework seperti RICE atau MoSCoW. Membuat product roadmap dan mengkomunikasikannya ke stakeholder (C-level, engineering, sales). Mendefinisikan success metrics (OKR, KPI) dan menganalisis data produk untuk mengukur feature adoption dan user retention. Memfasilitasi sprint planning, backlog grooming, dan retrospective bersama tim engineering dan design.",
-      "skills": ["Product Roadmap", "PRD", "User Stories", "Backlog Prioritization", "RICE Framework", "OKR", "KPI", "User Research", "Market Research", "Stakeholder Communication", "Sprint Planning", "Agile", "Feature Adoption", "Retention Analysis", "Jira", "Confluence"]
-    },
-    {
-      "id": "ui-ux-designer",
-      "title": "UI/UX Designer",
-      "description": "Merancang pengalaman pengguna (user experience) dan antarmuka visual (user interface) untuk produk digital. Melakukan user research melalui interview, survey, dan contextual inquiry untuk membangun persona dan empathy map. Membuat user flow, information architecture, wireframe low-fidelity, dan prototype high-fidelity menggunakan Figma. Menjalankan usability testing dan menganalisis hasil untuk iterasi desain. Menerapkan prinsip visual design: typography, color theory, spacing, dan visual hierarchy. Membangun dan memelihara design system (komponen, token, guidelines) untuk konsistensi antar produk. Melakukan design handoff ke developer dengan spesifikasi yang jelas. Memastikan aksesibilitas (WCAG 2.1) pada setiap desain.",
-      "skills": ["Figma", "User Research", "Persona", "Empathy Map", "User Flow", "Wireframing", "Prototyping", "Usability Testing", "Visual Design", "Typography", "Color Theory", "Design System", "Information Architecture", "Design Handoff", "WCAG", "Accessibility"]
-    },
-    {
-      "id": "digital-marketer",
-      "title": "Digital Marketer",
-      "description": "Merencanakan dan mengeksekusi kampanye pemasaran digital di berbagai kanal online. Mengoptimasi website untuk mesin pencari (SEO) melalui keyword research, on-page optimization, dan link building. Mengelola iklan berbayar (Google Ads, Meta Ads, TikTok Ads) dengan mengatur bidding strategy, audience targeting, dan A/B testing creative. Membuat konten pemasaran untuk media sosial (Instagram, TikTok, LinkedIn), blog, dan email newsletter. Menganalisis performa kampanye menggunakan Google Analytics 4 (GA4), mengukur conversion rate, cost per acquisition (CPA), dan return on ad spend (ROAS). Mengelola CRM dan email automation workflow untuk nurturing leads. Melakukan audience segmentation dan retargeting untuk meningkatkan customer lifetime value.",
-      "skills": ["SEO", "Google Ads", "Meta Ads", "Social Media Marketing", "Content Marketing", "Email Marketing", "Google Analytics", "GA4", "CRM", "Conversion Rate Optimization", "Audience Targeting", "Retargeting", "Copywriting", "Campaign Management", "ROAS", "CPA"]
-    },
-    {
-      "id": "hr-specialist",
-      "title": "Human Resource Specialist",
-      "description": "Mengelola seluruh proses sumber daya manusia dalam organisasi. Melaksanakan rekrutmen end-to-end: membuat job posting, screening CV lamaran kerja, menjadwalkan interview, melakukan behavioral interview, dan negosiasi offering. Mengelola proses onboarding karyawan baru, orientasi perusahaan, dan administrasi kontrak kerja. Menyusun dan mengevaluasi program pelatihan dan pengembangan karyawan (training needs analysis). Mengelola sistem penilaian kinerja (performance appraisal) tahunan, 360-degree feedback, dan individual development plan. Menangani hubungan industrial, mediasi konflik karyawan, dan memastikan kepatuhan terhadap Undang-Undang Ketenagakerjaan. Mengoperasikan HRIS (Human Resource Information System) untuk pengelolaan data karyawan, absensi, cuti, dan payroll.",
-      "skills": ["Recruitment", "Behavioral Interview", "Onboarding", "Training Needs Analysis", "Performance Appraisal", "360 Feedback", "Employee Relations", "Labor Law", "HRIS", "Payroll Administration", "Job Description", "Compensation Benefits", "Organizational Development", "Conflict Mediation"]
+      "name": "IT",
+      "careers": [
+        {
+          "id": "software-engineer",
+          "title": "Software Engineer",
+          "description": "Merancang arsitektur perangkat lunak berskala besar menggunakan prinsip SOLID dan design patterns seperti Repository, Factory, dan Observer. Menulis kode dalam bahasa pemrograman seperti Java, Go, Python, atau TypeScript untuk membangun microservices yang berkomunikasi melalui REST API dan gRPC. Mengimplementasikan algoritma dan struktur data untuk optimasi performa sistem. Melakukan code review, menulis unit test dan integration test, serta mengelola version control dengan Git. Bekerja dengan Docker container, CI/CD pipeline, dan deployment ke cloud. Debugging, profiling, dan refactoring kode legacy menjadi arsitektur yang lebih maintainable.",
+          "skills": ["System Architecture", "Design Patterns", "SOLID Principles", "Microservices", "REST API", "gRPC", "Git", "Unit Testing", "Integration Testing", "Code Review", "Docker", "CI/CD", "Algorithms", "Data Structures", "TypeScript", "Go", "Java", "Python", "Debugging", "Refactoring"]
+        },
+        {
+          "id": "backend-engineer",
+          "title": "Backend Engineer",
+          "description": "Membangun dan mengoptimalkan server-side application menggunakan Node.js, Express, atau framework backend lainnya. Mendesain skema database relasional dengan PostgreSQL atau MySQL, menulis query SQL yang efisien, membuat database index, dan menerapkan migration strategy. Mengimplementasikan RESTful API endpoints dengan validasi request, error handling, dan pagination. Mengelola autentikasi menggunakan OAuth2, JWT token, dan session management. Mengkonfigurasi caching layer dengan Redis, message queue dengan RabbitMQ atau Kafka, dan rate limiting untuk menangani high-traffic. Menulis ORM queries, mengoptimalkan N+1 query problems, dan memastikan data consistency dengan transaction management.",
+          "skills": ["Node.js", "Express", "PostgreSQL", "MySQL", "SQL Query Optimization", "Database Indexing", "REST API", "OAuth2", "JWT", "Redis", "RabbitMQ", "Kafka", "Rate Limiting", "Caching", "ORM", "Transaction Management", "Error Handling", "Migration Strategy"]
+        },
+        {
+          "id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "description": "Mengembangkan antarmuka web interaktif menggunakan React.js, Vue.js, atau Angular dengan TypeScript. Membangun komponen UI reusable, mengelola state management dengan Redux atau Zustand, dan mengoptimasi rendering performance melalui memoization dan lazy loading. Mengimplementasikan responsive design dengan CSS Grid, Flexbox, dan media queries untuk berbagai ukuran layar. Menangani client-side routing, form validation, dan integrasi dengan REST API melalui fetch atau Axios. Memastikan aksesibilitas (WCAG compliance), SEO-friendly markup dengan SSR/SSG via Next.js, dan cross-browser compatibility. Menulis end-to-end test dengan Cypress atau Playwright.",
+          "skills": ["React.js", "Vue.js", "Angular", "TypeScript", "HTML5", "CSS3", "Responsive Design", "State Management", "Redux", "Next.js", "Webpack", "Vite", "Accessibility", "SSR", "SSG", "Cypress", "Playwright", "REST API Integration", "Component Architecture"]
+        },
+        {
+          "id": "mobile-engineer",
+          "title": "Mobile Engineer",
+          "description": "Mengembangkan aplikasi mobile native untuk Android menggunakan Kotlin dan Android SDK, atau iOS menggunakan Swift dan UIKit/SwiftUI. Alternatifnya, membangun aplikasi cross-platform dengan Flutter (Dart) atau React Native. Mengimplementasikan navigasi layar, gesture handling, local storage dengan SQLite atau Room database, dan offline-first architecture. Mengelola push notification via Firebase Cloud Messaging, integrasi kamera dan sensor perangkat, serta secure storage untuk credential. Mengoptimasi battery consumption, memory usage, dan app startup time. Melakukan build, signing, dan deployment ke Google Play Store atau Apple App Store melalui mobile CI/CD pipeline.",
+          "skills": ["Kotlin", "Swift", "Flutter", "Dart", "React Native", "Android SDK", "iOS SDK", "SQLite", "Room Database", "Firebase", "Push Notifications", "App Store Deployment", "Google Play", "Mobile UI", "Offline Storage", "Camera Integration", "Performance Profiling"]
+        },
+        {
+          "id": "data-scientist",
+          "title": "Data Scientist",
+          "description": "Melakukan analisis statistik dan eksplorasi data (EDA) menggunakan Python, Pandas, dan NumPy untuk menemukan pola dan insight dari dataset. Membangun model machine learning untuk klasifikasi, regresi, dan clustering menggunakan scikit-learn. Melakukan feature engineering, encoding categorical variables, handling missing values, dan normalisasi data. Mengevaluasi model dengan metrik seperti accuracy, precision, recall, F1-score, dan AUC-ROC. Menjalankan A/B testing dan hypothesis testing (t-test, chi-square) untuk memvalidasi keputusan bisnis. Membuat visualisasi data dengan matplotlib, seaborn, atau Plotly untuk mempresentasikan temuan kepada stakeholders non-teknis. Bekerja dengan Jupyter Notebook untuk eksperimen iteratif.",
+          "skills": ["Python", "Pandas", "NumPy", "scikit-learn", "Statistics", "Hypothesis Testing", "EDA", "Feature Engineering", "Classification", "Regression", "Clustering", "A/B Testing", "Data Visualization", "matplotlib", "Jupyter Notebook", "SQL", "Model Evaluation"]
+        },
+        {
+          "id": "machine-learning-engineer",
+          "title": "Machine Learning Engineer",
+          "description": "Membangun dan men-deploy model deep learning ke production menggunakan PyTorch atau TensorFlow. Mendesain neural network architecture (CNN, RNN, Transformer), menulis training loop, mengkonfigurasi hyperparameter tuning, dan mengelola eksperimen dengan MLflow atau Weights & Biases. Mengoptimasi model untuk inference dengan teknik quantization, pruning, dan konversi ke ONNX format. Membangun training pipeline otomatis dengan Airflow atau Kubeflow, mengelola dataset versioning dengan DVC, dan men-deploy model sebagai REST API inference service. Memonitor model drift dan data drift di production menggunakan tools seperti Evidently atau Seldon.",
+          "skills": ["PyTorch", "TensorFlow", "Deep Learning", "CNN", "RNN", "Transformer", "Training Pipeline", "Hyperparameter Tuning", "MLflow", "ONNX", "Model Serving", "MLOps", "Airflow", "Kubeflow", "DVC", "GPU Computing", "Model Optimization", "Quantization"]
+        },
+        {
+          "id": "data-analyst",
+          "title": "Data Analyst",
+          "description": "Menulis query SQL kompleks (JOIN, subquery, window functions, CTE) untuk mengekstrak data dari data warehouse. Membangun dashboard interaktif dan laporan bisnis menggunakan Power BI, Tableau, atau Google Data Studio untuk memvisualisasikan KPI dan metrik performa. Melakukan analisis cohort, funnel analysis, dan segmentasi pelanggan untuk mendukung keputusan pemasaran dan produk. Mengolah data di spreadsheet (Excel, Google Sheets) dengan pivot table, VLOOKUP, dan formula statistik. Membuat presentasi temuan data kepada tim non-teknis dengan storytelling yang jelas. Sesekali menggunakan Python atau R untuk data cleaning dan analisis sederhana.",
+          "skills": ["SQL", "Power BI", "Tableau", "Google Data Studio", "Excel", "Pivot Table", "Dashboard", "KPI Reporting", "Cohort Analysis", "Funnel Analysis", "Data Storytelling", "Google Sheets", "Window Functions", "CTE"]
+        },
+        {
+          "id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "description": "Mengelola infrastruktur server dan deployment pipeline secara otomatis. Menulis konfigurasi Docker container dan Docker Compose untuk environment development dan production. Mengorkestrasi container dengan Kubernetes, menulis Helm charts, dan mengelola cluster scaling. Membangun CI/CD pipeline menggunakan GitHub Actions, Jenkins, atau GitLab CI untuk automated build, test, dan deployment. Mengimplementasikan Infrastructure as Code (IaC) dengan Terraform atau Ansible untuk provisioning server. Mengkonfigurasi monitoring dan alerting dengan Prometheus dan Grafana, serta centralized logging dengan ELK Stack. Menangani incident response, rollback deployment, dan disaster recovery.",
+          "skills": ["Docker", "Kubernetes", "Helm", "Terraform", "Ansible", "CI/CD", "GitHub Actions", "Jenkins", "Prometheus", "Grafana", "ELK Stack", "Infrastructure as Code", "Container Orchestration", "Linux Administration", "Shell Scripting", "Incident Response"]
+        },
+        {
+          "id": "cloud-engineer",
+          "title": "Cloud Engineer",
+          "description": "Merancang dan mengelola infrastruktur cloud di platform AWS, GCP, atau Azure. Mengkonfigurasi jaringan virtual (VPC, subnet, security group), IAM policy dan role-based access control, serta encrypted storage (S3, GCS, Azure Blob). Membangun arsitektur serverless menggunakan AWS Lambda, API Gateway, dan DynamoDB. Mengelola container platform (ECS, EKS, GKE), auto-scaling group, dan load balancer. Mengimplementasikan backup strategy, disaster recovery plan, dan multi-region deployment. Melakukan cost optimization dengan reserved instances, spot instances, dan resource tagging. Memonitor cloud resources dengan CloudWatch, Cloud Monitoring, atau Datadog.",
+          "skills": ["AWS", "GCP", "Azure", "VPC", "IAM", "S3", "Lambda", "Serverless", "ECS", "EKS", "GKE", "Load Balancer", "Auto Scaling", "CloudWatch", "Terraform", "Cost Optimization", "Disaster Recovery", "Multi-Region"]
+        },
+        {
+          "id": "qa-engineer",
+          "title": "QA Engineer",
+          "description": "Menjamin kualitas perangkat lunak melalui perencanaan test strategy dan eksekusi pengujian. Menulis automated test script untuk UI testing menggunakan Selenium atau Cypress, dan API testing menggunakan Postman atau RestAssured. Mendesain test case, test scenario, dan test data berdasarkan requirement specification. Menjalankan regression testing, smoke testing, dan sanity testing pada setiap release cycle. Melakukan performance testing dan load testing menggunakan k6 atau JMeter untuk mengukur response time dan throughput. Melaporkan bug dengan detail reproduksi di Jira atau TestRail, melakukan defect triage, dan memverifikasi bug fix. Berpartisipasi dalam sprint review untuk memvalidasi acceptance criteria.",
+          "skills": ["Test Automation", "Selenium", "Cypress", "Postman", "API Testing", "Test Case Design", "Regression Testing", "Performance Testing", "k6", "JMeter", "Bug Reporting", "Jira", "TestRail", "Smoke Testing", "Load Testing", "Test Strategy"]
+        },
+        {
+          "id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "description": "Memantau ancaman keamanan siber melalui Security Operations Center (SOC) dan menganalisis alert dari SIEM (Splunk, QRadar, atau ELK). Melakukan investigasi insiden keamanan, analisis malware, dan forensik digital untuk mengidentifikasi attack vector dan indicator of compromise (IoC). Menjalankan vulnerability scanning menggunakan Nessus atau OpenVAS dan melakukan penetration testing dasar. Mengkonfigurasi firewall rules, WAF policy, dan endpoint detection and response (EDR). Menyusun incident response playbook dan menangani eskalasi insiden. Memastikan kepatuhan terhadap standar keamanan seperti ISO 27001, NIST framework, dan OWASP Top 10. Mengelola threat intelligence feeds untuk deteksi ancaman proaktif.",
+          "skills": ["SOC", "SIEM", "Splunk", "Incident Response", "Vulnerability Scanning", "Nessus", "Penetration Testing", "Firewall", "WAF", "EDR", "Forensic Analysis", "Malware Analysis", "ISO 27001", "NIST", "OWASP", "Threat Intelligence"]
+        },
+        {
+          "id": "network-engineer",
+          "title": "Network Engineer",
+          "description": "Merancang dan mengelola infrastruktur jaringan enterprise meliputi konfigurasi router, switch, dan access point. Mengimplementasikan routing protocol (OSPF, BGP, EIGRP) dan switching technology (VLAN, STP, EtherChannel). Mengkonfigurasi VPN site-to-site dan remote access, firewall Fortinet atau Palo Alto, serta QoS policy untuk traffic prioritization. Melakukan network monitoring menggunakan SNMP, Nagios, atau PRTG, dan troubleshooting konektivitas dengan tools seperti Wireshark, traceroute, dan ping. Mengelola IP address management (IPAM), DHCP, DNS, dan wireless LAN controller. Vendor utama: Cisco, Juniper, MikroTik. Sertifikasi relevan: CCNA, CCNP.",
+          "skills": ["Routing", "Switching", "OSPF", "BGP", "VLAN", "VPN", "Firewall", "QoS", "Cisco", "Juniper", "MikroTik", "Wireshark", "SNMP", "Network Monitoring", "DHCP", "DNS", "Troubleshooting", "CCNA"]
+        },
+        {
+          "id": "product-manager",
+          "title": "Product Manager",
+          "description": "Mengelola siklus hidup produk digital dari ideation hingga launch. Melakukan user research dan market research untuk memahami kebutuhan pelanggan dan competitive landscape. Menulis Product Requirements Document (PRD), mendefinisikan user stories dan acceptance criteria, serta memprioritaskan product backlog menggunakan framework seperti RICE atau MoSCoW. Membuat product roadmap dan mengkomunikasikannya ke stakeholder (C-level, engineering, sales). Mendefinisikan success metrics (OKR, KPI) dan menganalisis data produk untuk mengukur feature adoption dan user retention. Memfasilitasi sprint planning, backlog grooming, dan retrospective bersama tim engineering dan design.",
+          "skills": ["Product Roadmap", "PRD", "User Stories", "Backlog Prioritization", "RICE Framework", "OKR", "KPI", "User Research", "Market Research", "Stakeholder Communication", "Sprint Planning", "Agile", "Feature Adoption", "Retention Analysis", "Jira", "Confluence"]
+        },
+        {
+          "id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "description": "Merancang pengalaman pengguna (user experience) dan antarmuka visual (user interface) untuk produk digital. Melakukan user research melalui interview, survey, dan contextual inquiry untuk membangun persona dan empathy map. Membuat user flow, information architecture, wireframe low-fidelity, dan prototype high-fidelity menggunakan Figma. Menjalankan usability testing dan menganalisis hasil untuk iterasi desain. Menerapkan prinsip visual design: typography, color theory, spacing, dan visual hierarchy. Membangun dan memelihara design system (komponen, token, guidelines) untuk konsistensi antar produk. Melakukan design handoff ke developer dengan spesifikasi yang jelas. Memastikan aksesibilitas (WCAG 2.1) pada setiap desain.",
+          "skills": ["Figma", "User Research", "Persona", "Empathy Map", "User Flow", "Wireframing", "Prototyping", "Usability Testing", "Visual Design", "Typography", "Color Theory", "Design System", "Information Architecture", "Design Handoff", "WCAG", "Accessibility"]
+        },
+        {
+          "id": "digital-marketer",
+          "title": "Digital Marketer",
+          "description": "Merencanakan dan mengeksekusi kampanye pemasaran digital di berbagai kanal online. Mengoptimasi website untuk mesin pencari (SEO) melalui keyword research, on-page optimization, dan link building. Mengelola iklan berbayar (Google Ads, Meta Ads, TikTok Ads) dengan mengatur bidding strategy, audience targeting, dan A/B testing creative. Membuat konten pemasaran untuk media sosial (Instagram, TikTok, LinkedIn), blog, dan email newsletter. Menganalisis performa kampanye menggunakan Google Analytics 4 (GA4), mengukur conversion rate, cost per acquisition (CPA), dan return on ad spend (ROAS). Mengelola CRM dan email automation workflow untuk nurturing leads. Melakukan audience segmentation dan retargeting untuk meningkatkan customer lifetime value.",
+          "skills": ["SEO", "Google Ads", "Meta Ads", "Social Media Marketing", "Content Marketing", "Email Marketing", "Google Analytics", "GA4", "CRM", "Conversion Rate Optimization", "Audience Targeting", "Retargeting", "Copywriting", "Campaign Management", "ROAS", "CPA"]
+        },
+        {
+          "id": "hr-specialist",
+          "title": "Human Resource Specialist",
+          "description": "Mengelola seluruh proses sumber daya manusia dalam organisasi. Melaksanakan rekrutmen end-to-end: membuat job posting, screening CV lamaran kerja, menjadwalkan interview, melakukan behavioral interview, dan negosiasi offering. Mengelola proses onboarding karyawan baru, orientasi perusahaan, dan administrasi kontrak kerja. Menyusun dan mengevaluasi program pelatihan dan pengembangan karyawan (training needs analysis). Mengelola sistem penilaian kinerja (performance appraisal) tahunan, 360-degree feedback, dan individual development plan. Menangani hubungan industrial, mediasi konflik karyawan, dan memastikan kepatuhan terhadap Undang-Undang Ketenagakerjaan. Mengoperasikan HRIS (Human Resource Information System) untuk pengelolaan data karyawan, absensi, cuti, dan payroll.",
+          "skills": ["Recruitment", "Behavioral Interview", "Onboarding", "Training Needs Analysis", "Performance Appraisal", "360 Feedback", "Employee Relations", "Labor Law", "HRIS", "Payroll Administration", "Job Description", "Compensation Benefits", "Organizational Development", "Conflict Mediation"]
+        }
+      ]
     }
   ]
 }

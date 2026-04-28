@@ -36,6 +36,16 @@ def load_json(path: str):
         return json.load(f)
 
 
+def _flatten_careers(doc):
+    if isinstance(doc, dict) and 'fields' in doc:
+        flat = []
+        for field in doc['fields']:
+            for c in field.get('careers', []):
+                flat.append({**c, 'field': field.get('name')})
+        return flat
+    return doc.get('careers', doc) if isinstance(doc, dict) else doc
+
+
 def print_separator(char='=', width=80):
     print(char * width)
 
@@ -62,7 +72,7 @@ def main():
     students_doc = load_json(args.cv)
     careers_doc = load_json(args.careers)
     students = students_doc.get('students', students_doc)
-    careers = careers_doc.get('careers', careers_doc)
+    careers = _flatten_careers(careers_doc)
 
     career_ids = [c['id'] for c in careers]
     career_titles = {c['id']: c['title'] for c in careers}

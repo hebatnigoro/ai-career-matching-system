@@ -20,9 +20,10 @@ def analyze_drift(
     enabling meaningful comparison.
 
     Categorization (on normalized scores, range 0-1):
-      1. Aligned:            declared_norm >= tau_high AND norm_advantage <= delta_minor
-      2. Minor Drift:        declared_norm >= tau_mid  AND norm_advantage > delta_minor
-      3. Major Drift:        declared_norm <  tau_mid  AND best_alt_norm >= tau_mid
+      0. Exploration Needed:  sim_range < 0.02 (model cannot discriminate)
+      1. Aligned:             declared_norm >= tau_high AND norm_advantage <= delta_minor
+      2. Minor Drift:         declared_norm >= tau_mid  AND norm_advantage > delta_minor
+      3. Major Drift:         declared_norm <  tau_mid  AND best_alt_norm >= tau_mid
       4. Exploration Needed:  declared_norm <  tau_mid  AND best_alt_norm < tau_mid
 
     Default thresholds (calibrated for normalized 0-1 range):
@@ -88,22 +89,23 @@ def analyze_drift(
                 f"namun alternatif '{best_alt_id}' lebih cocok "
                 f"(norm_adv={norm_advantage:.3f} > {delta_minor})."
             )
-        elif declared_norm < tau_mid:
+        elif declared_norm < tau_mid and best_alt_norm >= tau_mid:
             status = 'Major Drift'
             rationale = (
                 f"Minat yang dideklarasikan kurang sesuai "
                 f"(relative_score={declared_norm:.3f} < {tau_mid}), "
                 f"sementara alternatif '{best_alt_id}' jauh lebih cocok "
-                f"(relative_score={best_alt_norm:.3f})."
+                f"(relative_score={best_alt_norm:.3f} >= {tau_mid})."
             )
         else:
+            # declared_norm < tau_mid AND best_alt_norm < tau_mid
             status = 'Exploration Needed'
             rationale = (
                 f"Minat yang dideklarasikan kurang sesuai "
                 f"(relative_score={declared_norm:.3f} < {tau_mid}) "
                 f"dan tidak ada alternatif yang kuat "
                 f"(best alt relative_score={best_alt_norm:.3f} < {tau_mid}). "
-                f"Disarankan eksplorasi karier lebih lanjut."
+                f"Disarankan eksplorasi karier lebih lanjut atau perkaya isi CV."
             )
 
         return {
