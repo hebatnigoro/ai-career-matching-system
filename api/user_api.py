@@ -1,6 +1,7 @@
 import re
 from typing import List, Optional, Dict
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import json
 import os
@@ -69,6 +70,17 @@ app = FastAPI(
         "Profil karier dimuat dari server (data/careers.json). "
         "Skor utama adalah relative_score (0-1) yang dinormalisasi per-mahasiswa."
     ),
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
