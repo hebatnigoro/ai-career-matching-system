@@ -1,88 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AnalyzeForm } from "@/components/analyze-form";
-import { ResultsDisplay } from "@/components/results-display";
-import { analyzeCV } from "@/lib/api";
-import type { AnalyzeResponse } from "@/lib/types";
+import { useEffect, useRef, useState } from "react";
+import { Navbar, type PageId } from "@/components/navbar";
+import { HomeSection } from "@/components/home-section";
+import { HowSection } from "@/components/how-section";
+import { AnalyzerSection } from "@/components/analyzer-section";
 
-export default function Home() {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<AnalyzeResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+export default function App() {
+  const [page, setPage] = useState<PageId>("home");
+  const [display, setDisplay] = useState<PageId>("home");
+  const [anim, setAnim] = useState<string>("");
+  const busy = useRef(false);
+  const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
-  async function handleAnalyze(params: {
-    file: File;
-    targetCareerId: string;
-    includeAiPlan: boolean;
-  }) {
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const res = await analyzeCV(params);
-      setResult(res);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    setMouse({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    const fn = (e: MouseEvent) => setMouse({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", fn);
+    return () => window.removeEventListener("mousemove", fn);
+  }, []);
+
+  function navigate(to: PageId) {
+    if (to === page || busy.current) return;
+    busy.current = true;
+    setAnim("pd-page-exit");
+    setTimeout(() => {
+      setDisplay(to);
+      setPage(to);
+      setAnim("pd-page-enter");
+      setTimeout(() => {
+        busy.current = false;
+      }, 450);
+    }, 250);
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-10 space-y-8">
-        <header className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Career Path Drift Analyzer
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Upload CV → pilih target karier → dapatkan analisis kecocokan, skill
-            gap, dan rencana belajar dari AI.
-          </p>
-        </header>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Mulai Analisis</CardTitle>
-            <CardDescription>
-              CV diproses oleh server lokal. Embedding pakai
-              multilingual-e5-base; AI plan oleh Gemini 2.5 Flash dengan Google
-              Search grounding.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AnalyzeForm onSubmit={handleAnalyze} loading={loading} />
-          </CardContent>
-        </Card>
-
-        {loading && (
-          <Card>
-            <CardContent className="py-8">
-              <p className="text-sm text-muted-foreground text-center">
-                Menganalisis CV… (10–30 detik, lebih lama bila AI plan aktif)
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertTitle>Analisis gagal</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {result && <ResultsDisplay result={result} />}
+    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <Navbar page={page} navigate={navigate} />
+      <div className={anim} key={display} style={{ flex: 1 }}>
+        {display === "home" && <HomeSection navigate={navigate} mouse={mouse} />}
+        {display === "how" && <HowSection navigate={navigate} />}
+        {display === "analyzer" && <AnalyzerSection />}
       </div>
-    </main>
+      <footer
+        style={{
+          borderTop: "2.5px solid #1e1a3a",
+          padding: "26px 24px",
+          textAlign: "center",
+          background: "#fff",
+          boxShadow: "inset 0 4px 0 #e8e5f5",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
+          <span style={{ fontSize: 18 }}>🧭</span>
+          <span style={{ fontWeight: 900, fontSize: 15 }}>
+            Path<span style={{ color: "#7c6fe0" }}>Drift</span>
+          </span>
+          <span style={{ color: "#ccc" }}>·</span>
+          <span style={{ color: "#9896b8", fontWeight: 600, fontSize: 13 }}>AI Career Matching System</span>
+        </div>
+        <p style={{ color: "#b8b6d4", fontSize: 12, fontWeight: 600 }}>
+          Built for thesis research · BERT Embeddings · FastAPI · Gemini AI
+        </p>
+      </footer>
+    </div>
   );
 }
