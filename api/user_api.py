@@ -13,6 +13,7 @@ from src.similarity import cosine_similarity_matrix, normalize_scores_minmax
 from src.drift import analyze_drift
 from src.recommender import recommend_alternatives
 from src.skill_gap import analyze_skill_gap
+from src.skill_extract import SkillRegistry, build_skill_registry
 from src.file_extract import extract_text_auto
 from src.ai_planner import generate_career_plan
 
@@ -92,6 +93,7 @@ _career_ids: List[str] = []
 _career_titles: Dict[str, str] = {}
 _career_emb: Optional[np.ndarray] = None
 _title_emb: Optional[np.ndarray] = None
+_skill_registry: Optional[SkillRegistry] = None
 _default_model_name = "intfloat/multilingual-e5-base"
 _RESOLVE_THRESHOLD = 0.78
 
@@ -190,13 +192,18 @@ def _resolve_career_id(query: str) -> str:
 
 @app.on_event("startup")
 def _startup():
-    global _career_repo, _career_index, _career_ids, _career_titles
+    global _career_repo, _career_index, _career_ids, _career_titles, _skill_registry
     _career_repo = _load_careers_from_file()
     _career_index = {c['id']: c for c in _career_repo if 'id' in c}
     _career_ids = [c['id'] for c in _career_repo]
     _career_titles = {c['id']: c.get('title', c['id']) for c in _career_repo}
     if _career_repo:
         _precompute_career_embeddings(_default_model_name)
+        # Build a global skill registry once. Aggregating across every career
+        # lets the extractor surface CV skills not required by the target
+        # (the "extra_cv_skills" output), useful for thesis-level analysis.
+        _skill_registry = build_skill_registry(_career_repo)
+        print(f"[startup] skill registry built: {len(_skill_registry.canonical_skills)} canonical skills")
     _gemini_key = os.environ.get("GEMINI_API_KEY") or ""
     if _gemini_key:
         print(f"[startup] GEMINI_API_KEY visible to uvicorn process (length={len(_gemini_key)}, prefix={_gemini_key[:8]}...)")
@@ -292,13 +299,14 @@ def analyze_single_core(
         for cid, _, rel in recs
     ]
 
-    # Skill gap analysis
+    # Skill gap analysis (layered evidence-based extractor)
     target_skills = _career_index.get(target_career_id, {}).get('skills', [])
     skill_gap = analyze_skill_gap(
         cv_text=cv_text,
         skills=target_skills,
         model=model,
         threshold=thresholds.skill_threshold,
+        registry=_skill_registry,
     )
 
     # Career transition context: jika karier terkuat CV berbeda dari target
@@ -557,14 +565,19 @@ def analyze_batch(req: AnalyzeBatchRequest):
             for cid, _, rel in recs
         ]
 
-        # Skill gap analysis
+        # Skill gap analysis (layered evidence-based extractor).
+        # Build a registry from the request's career list so it covers every
+        # candidate, enabling extra_cv_skills (skills the CV has but the
+        # declared career does not require).
         skill_gap = None
         if s.declared_interest and s.declared_interest in career_skills:
+            batch_registry = build_skill_registry([c.model_dump() for c in careers])
             skill_gap = analyze_skill_gap(
                 cv_text=s.cv_text,
                 skills=career_skills[s.declared_interest],
                 model=model,
                 threshold=req.thresholds.skill_threshold,
+                registry=batch_registry,
             )
 
         # Career transition context
