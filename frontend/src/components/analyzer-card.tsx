@@ -24,7 +24,7 @@ const inputStyle: React.CSSProperties = {
   padding: "12px 14px",
   borderRadius: 12,
   border: "2.5px solid #1e1a3a",
-  background: "#faf8ff",
+  background: "#F8FAFC",
   fontFamily: "inherit",
   fontSize: 14,
   color: "#1e1a3a",
@@ -80,7 +80,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
               height: 32,
               borderRadius: "50%",
               border: "2.5px solid #1e1a3a",
-              background: step >= n ? "#7c6fe0" : "#fff",
+              background: step >= n ? "#0EA5E9" : "#fff",
               color: step >= n ? "#fff" : "#1e1a3a",
               display: "flex",
               alignItems: "center",
@@ -115,7 +115,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
                 ...inputStyle,
                 textAlign: "center",
                 padding: "22px 14px",
-                background: "#ede9ff",
+                background: "#E0F2FE",
                 fontWeight: 700,
               }}
             >
@@ -123,7 +123,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             </div>
           </label>
 
-          <p style={{ fontSize: 12, color: "#9896b8", marginBottom: 18, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: "#64748B", marginBottom: 18, lineHeight: 1.5 }}>
             CV diekstrak server-side via PyMuPDF / python-docx. CV bilingual EN+ID didukung.
           </p>
 
@@ -159,13 +159,13 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             style={inputStyle}
             autoComplete="off"
           />
-          <p style={{ fontSize: 12, color: "#9896b8", marginTop: 8, lineHeight: 1.5 }}>
-            Tidak perlu format slug — backend punya fuzzy resolver. <code style={{ background: "#ede9ff", padding: "1px 5px", borderRadius: 4 }}>Data Analyst</code>, <code style={{ background: "#ede9ff", padding: "1px 5px", borderRadius: 4 }}>data analyst</code>, dan <code style={{ background: "#ede9ff", padding: "1px 5px", borderRadius: 4 }}>data-analyst</code> semua diterima.
+          <p style={{ fontSize: 12, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>
+            Tidak perlu format slug — backend punya fuzzy resolver. <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>Data Analyst</code>, <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>data analyst</code>, dan <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>data-analyst</code> semua diterima.
           </p>
 
           {targetCareerId.trim() && (
-            <div style={{ marginTop: 18, padding: 14, background: "#ede9ff", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a" }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#7c6fe0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
+            <div style={{ marginTop: 18, padding: 14, background: "#E0F2FE", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a" }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#0EA5E9", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
                 Target
               </div>
               <div style={{ fontSize: 16, fontWeight: 900, color: "#1e1a3a" }}>{targetCareerId.trim()}</div>
@@ -197,8 +197,8 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
       {/* STEP 3 — Confirm + analyze */}
       {step === 3 && (
         <div style={{ animation: "pd-stepSlide 0.35s ease both" }}>
-          <div style={{ padding: 16, background: "#faf8ff", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16 }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: "#7c6fe0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+          <div style={{ padding: 16, background: "#F8FAFC", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: "#0EA5E9", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
               Ringkasan
             </div>
             <div style={{ fontSize: 13, color: "#1e1a3a", marginBottom: 4 }}>
@@ -209,19 +209,19 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             </div>
           </div>
 
-          <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, padding: "10px 12px", background: "#fff8e6", border: "2.5px solid #1e1a3a", borderRadius: 10, boxShadow: "2px 2px 0 #1e1a3a", cursor: "pointer" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, padding: "10px 12px", background: "#FFF3CD", border: "2.5px solid #1e1a3a", borderRadius: 10, boxShadow: "2px 2px 0 #1e1a3a", cursor: "pointer" }}>
             <input
               type="checkbox"
               checked={includeAiPlan}
               onChange={(e) => setIncludeAiPlan(e.target.checked)}
-              style={{ width: 16, height: 16, accentColor: "#7c6fe0" }}
+              style={{ width: 16, height: 16, accentColor: "#0EA5E9" }}
             />
             <span style={{ fontSize: 13, fontWeight: 700, color: "#1e1a3a" }}>
               ✨ Generate AI Plan (Gemini) — interview &amp; learning plan, +10–15 detik
             </span>
           </label>
 
-          <p style={{ fontSize: 13, color: "#7a789a", marginBottom: 18, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: "#475569", marginBottom: 18, lineHeight: 1.6 }}>
             Klik tombol di bawah untuk menjalankan analisis. Sistem akan membandingkan skills di CV kamu dengan kebutuhan karier target dan memberi roadmap pengembangan.
           </p>
 
@@ -232,8 +232,8 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
               ← Kembali
             </CBtn>
             {loading ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#7c6fe0" }}>
-                <div style={{ width: 18, height: 18, border: "3px solid #ede9ff", borderTopColor: "#7c6fe0", borderRadius: "50%", animation: "pd-spin 0.7s linear infinite" }} />
+              <div style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#0EA5E9" }}>
+                <div style={{ width: 18, height: 18, border: "3px solid #E0F2FE", borderTopColor: "#0EA5E9", borderRadius: "50%", animation: "pd-spin 0.7s linear infinite" }} />
                 Menganalisis...
               </div>
             ) : (

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BgBlobs } from "./bg-blobs";
+import { Businessman } from "./businessman";
 import { AnalyzerCard } from "./analyzer-card";
 import { ResultsSection } from "./results-section";
 import { analyzeCV, fetchHealth, API_BASE, type Health } from "@/lib/api";
 import type { AnalyzeResponse } from "@/lib/types";
+
+type Mouse = { x: number; y: number };
 
 const errBox: React.CSSProperties = {
   padding: "12px 16px",
@@ -41,13 +43,13 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
 
   if (state.kind === "checking") {
     return (
-      <div style={{ ...base, background: "#fff", color: "#7c6fe0" }}>
+      <div style={{ ...base, background: "#fff", color: "#0EA5E9" }}>
         <span
           style={{
             width: 10,
             height: 10,
             borderRadius: "50%",
-            background: "#b0aece",
+            background: "#94A3B8",
             display: "inline-block",
             animation: "pd-spin 0.9s linear infinite",
           }}
@@ -58,8 +60,8 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
   }
   if (state.kind === "ok") {
     return (
-      <div style={{ ...base, background: "#d6f5ec", color: "#1e1a3a" }}>
-        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#6dd5c0", display: "inline-block" }} />
+      <div style={{ ...base, background: "#D8F5E5", color: "#1e1a3a" }}>
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#4ECDC4", display: "inline-block" }} />
         Backend connected · {state.health.careers_loaded} karier dimuat
       </div>
     );
@@ -70,14 +72,14 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
         <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#d04848", display: "inline-block" }} />
         Backend tidak terhubung
       </div>
-      <div style={{ fontSize: 12, color: "#7a789a", textAlign: "center", maxWidth: 480, lineHeight: 1.6 }}>
-        Tidak bisa menjangkau <code style={{ background: "#ede9ff", padding: "1px 5px", borderRadius: 4 }}>{API_BASE}</code>. Pastikan FastAPI berjalan:
+      <div style={{ fontSize: 12, color: "#475569", textAlign: "center", maxWidth: 480, lineHeight: 1.6 }}>
+        Tidak bisa menjangkau <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>{API_BASE}</code>. Pastikan FastAPI berjalan:
         <br />
         <code style={{ background: "#1e1a3a", color: "#fff", padding: "2px 8px", borderRadius: 4, display: "inline-block", marginTop: 6 }}>
           uvicorn api.user_api:app --reload
         </code>
         <br />
-        <span style={{ fontSize: 11, color: "#9896b8" }}>Detail: {state.message}</span>
+        <span style={{ fontSize: 11, color: "#64748B" }}>Detail: {state.message}</span>
         <br />
         <button
           onClick={onRetry}
@@ -102,7 +104,7 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
   );
 }
 
-export function AnalyzerSection() {
+export function AnalyzerSection({ mouse }: { mouse: Mouse }) {
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -146,10 +148,13 @@ export function AnalyzerSection() {
 
   return (
     <div style={{ minHeight: "100vh", padding: "100px 24px 80px", position: "relative" }}>
-      <BgBlobs />
       <div style={{ maxWidth: 680, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 18 }}>
           <ConnectionBadge state={conn} onRetry={checkHealth} />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, filter: "drop-shadow(4px 6px 0px #BAE6FD)" }}>
+          <Businessman mouseX={mouse.x} mouseY={mouse.y} expression="focused" scale={0.6} />
         </div>
 
         <div style={{ textAlign: "center", marginBottom: 32 }}>
@@ -162,7 +167,7 @@ export function AnalyzerSection() {
               padding: "5px 18px",
               fontWeight: 800,
               fontSize: 11,
-              color: "#7c6fe0",
+              color: "#0EA5E9",
               boxShadow: "3px 3px 0 #1e1a3a",
               marginBottom: 14,
               textTransform: "uppercase",
@@ -174,7 +179,7 @@ export function AnalyzerSection() {
           <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6 }}>
             {result ? "Your Career Analysis" : "Analyze Your CV"}
           </h2>
-          <p style={{ fontSize: 14, color: "#7a789a" }}>
+          <p style={{ fontSize: 14, color: "#475569" }}>
             {result
               ? "Hasil analisis karier kamu di bawah ini"
               : "Upload CV dan tulis karier target · Instant AI analysis"}

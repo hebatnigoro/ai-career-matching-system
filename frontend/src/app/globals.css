@@ -129,30 +129,31 @@
   }
 }
 
-/* PathDrift cartoon theme */
+/* PathDrift cartoon theme — Sunset Pop palette */
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-jakarta), 'Plus Jakarta Sans', sans-serif;
-  background: #f0ecff !important;
+  background: #FFFFFF !important;
   color: #1e1a3a !important;
   min-height: 100vh;
   overflow-x: hidden;
 }
 ::-webkit-scrollbar { width: 7px; }
-::-webkit-scrollbar-track { background: #ede9ff; }
-::-webkit-scrollbar-thumb { background: #7c6fe0; border-radius: 4px; }
+::-webkit-scrollbar-track { background: #E0F2FE; }
+::-webkit-scrollbar-thumb { background: #0EA5E9; border-radius: 4px; }
 
 @keyframes pd-spin       { to { transform: rotate(360deg); } }
 @keyframes pd-pageEnter  { from { opacity:0; transform:translateY(28px) scale(0.97); } to { opacity:1; transform:none; } }
 @keyframes pd-pageExit   { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(-20px) scale(0.97); } }
 @keyframes pd-stepSlide  { from { opacity:0; transform:translateX(-18px); } to { opacity:1; transform:none; } }
 @keyframes pd-fadeUp     { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+@keyframes pd-floatY     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
 .pd-page-enter { animation: pd-pageEnter 0.42s cubic-bezier(0.34,1.1,0.64,1) both; }
 .pd-page-exit  { animation: pd-pageExit 0.26s ease-in both; }
 
-select option   { background: #f0ecff; color: #1e1a3a; }
-select optgroup { color: #7c6fe0; font-weight: 800; }
+select option   { background: #FFFFFF; color: #1e1a3a; }
+select optgroup { color: #0EA5E9; font-weight: 800; }
 
 .pd-md h1 { font-size: 1.25rem; font-weight: 900; margin-top: 0.5rem; }
 .pd-md h2 { font-size: 1.1rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #1e1a3a; }
@@ -162,5 +163,5 @@ select optgroup { color: #7c6fe0; font-weight: 800; }
 .pd-md ol { list-style: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
 .pd-md li { margin: 0.25rem 0; }
 .pd-md strong { font-weight: 800; }
-.pd-md code { background: #ede9ff; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
-.pd-md a { color: #7c6fe0; text-decoration: underline; }
+.pd-md code { background: #E0F2FE; border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+.pd-md a { color: #0EA5E9; text-decoration: underline; }

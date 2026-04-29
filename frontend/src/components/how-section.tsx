@@ -1,14 +1,16 @@
 "use client";
 
-import { BgBlobs } from "./bg-blobs";
+import { Businessman } from "./businessman";
 import { CBtn } from "./cbtn";
 import type { PageId } from "./navbar";
 
+type Mouse = { x: number; y: number };
+
 const steps: { icon: string; color: string; border: string; title: string; sub: string; desc: string; num: string }[] = [
-  { icon: "📄", color: "#ede9ff", border: "#7c6fe0", title: "Upload Your CV", sub: "Unggah CV kamu", desc: "Upload PDF or DOCX. Bilingual CVs (EN & ID) are fully supported via multilingual-e5 embeddings.", num: "01" },
-  { icon: "🎯", color: "#e6faf7", border: "#6dd5c0", title: "Choose Target Career", sub: "Pilih karier target", desc: "Browse career profiles grouped by field. The backend resolver also accepts loose input like 'data analyst' or 'frontend dev'.", num: "02" },
-  { icon: "🤖", color: "#fff0f4", border: "#ff9bb5", title: "Deep Analysis", sub: "Analisis mendalam", desc: "BERT multilingual embeddings compute semantic similarity. Drift detection scores your alignment across all careers.", num: "03" },
-  { icon: "🗺️", color: "#fff8e6", border: "#ffd166", title: "Follow Your Roadmap", sub: "Ikuti rencana belajar", desc: "Get a personalized AI learning plan with skill gap breakdown, interview tips, and curated resources via Gemini.", num: "04" },
+  { icon: "📄", color: "#E0F2FE", border: "#0EA5E9", title: "Upload Your CV", sub: "Unggah CV kamu", desc: "Upload PDF or DOCX. Bilingual CVs (EN & ID) are fully supported via multilingual-e5 embeddings.", num: "01" },
+  { icon: "🎯", color: "#E5FFF8", border: "#4ECDC4", title: "Choose Target Career", sub: "Pilih karier target", desc: "Browse career profiles grouped by field. The backend resolver also accepts loose input like 'data analyst' or 'frontend dev'.", num: "02" },
+  { icon: "🤖", color: "#FEF3C7", border: "#F59E0B", title: "Deep Analysis", sub: "Analisis mendalam", desc: "BERT multilingual embeddings compute semantic similarity. Drift detection scores your alignment across all careers.", num: "03" },
+  { icon: "🗺️", color: "#FFF3CD", border: "#FFD93D", title: "Follow Your Roadmap", sub: "Ikuti rencana belajar", desc: "Get a personalized AI learning plan with skill gap breakdown, interview tips, and curated resources via Gemini.", num: "04" },
 ];
 
 const stack: [string, string, string][] = [
@@ -18,21 +20,25 @@ const stack: [string, string, string][] = [
   ["⚡", "FastAPI", "Python backend with cached career embeddings"],
 ];
 
-export function HowSection({ navigate }: { navigate: (to: PageId) => void }) {
+export function HowSection({ navigate, mouse }: { navigate: (to: PageId) => void; mouse: Mouse }) {
   return (
     <div style={{ minHeight: "100vh", padding: "100px 24px 80px", position: "relative" }}>
-      <BgBlobs />
       <div style={{ maxWidth: 820, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <div style={{ display: "inline-block", background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 100, padding: "5px 18px", fontWeight: 800, fontSize: 11, color: "#7c6fe0", boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Simple Process · Proses Mudah
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, flexWrap: "wrap", marginBottom: 48 }}>
+          <div style={{ filter: "drop-shadow(4px 6px 0px #BAE6FD)" }}>
+            <Businessman mouseX={mouse.x} mouseY={mouse.y} expression="thinking" scale={0.75} />
           </div>
-          <h2 style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>
-            How It <span style={{ color: "#7c6fe0" }}>Works</span>
-          </h2>
-          <p style={{ fontSize: 15, color: "#7a789a", maxWidth: 460, margin: "0 auto" }}>
-            4 steps from CV to career clarity · 4 langkah menuju karier impian
-          </p>
+          <div style={{ textAlign: "center", maxWidth: 480 }}>
+            <div style={{ display: "inline-block", background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 100, padding: "5px 18px", fontWeight: 800, fontSize: 11, color: "#0EA5E9", boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Simple Process · Proses Mudah
+            </div>
+            <h2 style={{ fontSize: 40, fontWeight: 900, letterSpacing: "-0.03em", marginBottom: 8 }}>
+              How It <span style={{ color: "#0EA5E9" }}>Works</span>
+            </h2>
+            <p style={{ fontSize: 15, color: "#475569", margin: "0 auto" }}>
+              4 steps from CV to career clarity · 4 langkah menuju karier impian
+            </p>
+          </div>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18, marginBottom: 48 }}>
@@ -45,7 +51,7 @@ export function HowSection({ navigate }: { navigate: (to: PageId) => void }) {
               <div style={{ flex: 1 }}>
                 <h3 style={{ fontSize: 19, fontWeight: 900, marginBottom: 3 }}>{s.title}</h3>
                 <p style={{ fontSize: 13, fontWeight: 700, color: s.border, marginBottom: 8 }}>{s.sub}</p>
-                <p style={{ fontSize: 14, color: "#5a587a", lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
+                <p style={{ fontSize: 14, color: "#334155", lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
               </div>
             </div>
           ))}
@@ -55,10 +61,10 @@ export function HowSection({ navigate }: { navigate: (to: PageId) => void }) {
           <h3 style={{ fontSize: 17, fontWeight: 900, marginBottom: 16 }}>🛠️ Under the Hood</h3>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(168px,1fr))", gap: 12 }}>
             {stack.map(([ic, t, d], i) => (
-              <div key={i} style={{ background: "#f0ecff", border: "2px solid #1e1a3a", borderRadius: 12, padding: "14px", boxShadow: "2px 2px 0 #1e1a3a" }}>
+              <div key={i} style={{ background: "#FFFFFF", border: "2px solid #1e1a3a", borderRadius: 12, padding: "14px", boxShadow: "2px 2px 0 #1e1a3a" }}>
                 <div style={{ fontSize: 22, marginBottom: 5 }}>{ic}</div>
                 <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 4 }}>{t}</div>
-                <div style={{ fontSize: 12, color: "#9896b8", lineHeight: 1.5 }}>{d}</div>
+                <div style={{ fontSize: 12, color: "#64748B", lineHeight: 1.5 }}>{d}</div>
               </div>
             ))}
           </div>

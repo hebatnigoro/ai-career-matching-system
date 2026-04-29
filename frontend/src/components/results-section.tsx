@@ -11,7 +11,7 @@ function pct(score: number | null | undefined) {
 }
 
 function scoreColor(p: number) {
-  return p >= 70 ? "#6dd5c0" : p >= 40 ? "#f0b86e" : "#e07a7a";
+  return p >= 70 ? "#4ECDC4" : p >= 40 ? "#f0b86e" : "#e07a7a";
 }
 
 const sectionLabel: React.CSSProperties = {
@@ -76,37 +76,37 @@ export function ResultsSection({ result, onReset }: Props) {
         <div style={{ fontSize: 16, fontWeight: 900, color: "#1e1a3a" }}>
           {result.target.title}
           {result.target.field && (
-            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#7c6fe0", background: "#fff", border: "2px solid #1e1a3a", borderRadius: 100, padding: "2px 10px", boxShadow: "2px 2px 0 #1e1a3a", verticalAlign: "middle" }}>
+            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#0EA5E9", background: "#fff", border: "2px solid #1e1a3a", borderRadius: 100, padding: "2px 10px", boxShadow: "2px 2px 0 #1e1a3a", verticalAlign: "middle" }}>
               {result.target.field}
             </span>
           )}
         </div>
-        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: "#7c6fe0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        <div style={{ marginTop: 6, fontSize: 12, fontWeight: 700, color: "#0EA5E9", textTransform: "uppercase", letterSpacing: "0.05em" }}>
           Status: {result.status}
         </div>
         {result.target.resolved_from && (
-          <div style={{ marginTop: 6, fontSize: 11, color: "#9896b8" }}>
-            Input <code style={{ background: "#ede9ff", padding: "1px 6px", borderRadius: 4 }}>{result.target.resolved_from}</code> →{" "}
-            <code style={{ background: "#ede9ff", padding: "1px 6px", borderRadius: 4 }}>{result.target.career_id}</code>
+          <div style={{ marginTop: 6, fontSize: 11, color: "#64748B" }}>
+            Input <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4 }}>{result.target.resolved_from}</code> →{" "}
+            <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4 }}>{result.target.career_id}</code>
           </div>
         )}
       </div>
 
       {/* Summary */}
-      <div style={{ padding: 16, background: "#ede9ff", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 20, fontSize: 14, color: "#1e1a3a", lineHeight: 1.6 }}>
+      <div style={{ padding: 16, background: "#E0F2FE", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 20, fontSize: 14, color: "#1e1a3a", lineHeight: 1.6 }}>
         {summary}
       </div>
 
       {/* Best alternative */}
       {result.best_alternative.career_id && result.best_alternative.career_id !== result.target.career_id && (
-        <div style={{ padding: 14, background: "#fff8e6", border: "2.5px solid #ffd166", borderRadius: 12, boxShadow: "3px 3px 0 #ffd166", marginBottom: 20 }}>
+        <div style={{ padding: 14, background: "#FFF3CD", border: "2.5px solid #FFD93D", borderRadius: 12, boxShadow: "3px 3px 0 #FFD93D", marginBottom: 20 }}>
           <div style={{ fontSize: 11, fontWeight: 800, color: "#1e1a3a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
             🌟 Alternatif terbaik
           </div>
           <div style={{ fontSize: 15, fontWeight: 900, color: "#1e1a3a" }}>
             {result.best_alternative.title}
             {result.best_alternative.field && (
-              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#7c6fe0" }}>[{result.best_alternative.field}]</span>
+              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#0EA5E9" }}>[{result.best_alternative.field}]</span>
             )}
             <span style={{ marginLeft: 10, fontSize: 13, fontWeight: 800, color: "#1e1a3a" }}>· {altScore}%</span>
           </div>
@@ -119,7 +119,7 @@ export function ResultsSection({ result, onReset }: Props) {
           <div style={sectionLabel}>✅ Skills yang sudah cocok ({matched.length})</div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {matched.map((s) => (
-              <span key={s.skill} style={{ ...pillBase, background: "#d6f5ec" }}>
+              <span key={s.skill} style={{ ...pillBase, background: "#D8F5E5" }}>
                 {s.skill}
               </span>
             ))}
@@ -154,7 +154,7 @@ export function ResultsSection({ result, onReset }: Props) {
                   display: "flex",
                   gap: 12,
                   padding: 14,
-                  background: r.career_id === result.target.career_id ? "#ede9ff" : "#faf8ff",
+                  background: r.career_id === result.target.career_id ? "#E0F2FE" : "#F8FAFC",
                   border: "2.5px solid #1e1a3a",
                   borderRadius: 12,
                   boxShadow: "3px 3px 0 #1e1a3a",
@@ -167,7 +167,7 @@ export function ResultsSection({ result, onReset }: Props) {
                     width: 32,
                     height: 32,
                     borderRadius: "50%",
-                    background: "#7c6fe0",
+                    background: "#0EA5E9",
                     color: "#fff",
                     border: "2.5px solid #1e1a3a",
                     display: "flex",
@@ -183,7 +183,7 @@ export function ResultsSection({ result, onReset }: Props) {
                   <div style={{ fontSize: 14, fontWeight: 900, color: "#1e1a3a" }}>
                     {r.title}
                     {r.field && (
-                      <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: "#7c6fe0" }}>[{r.field}]</span>
+                      <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: "#0EA5E9" }}>[{r.field}]</span>
                     )}
                   </div>
                 </div>
@@ -201,7 +201,7 @@ export function ResultsSection({ result, onReset }: Props) {
         <div style={{ marginBottom: 22, padding: 20, background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 16, boxShadow: "5px 5px 0 #1e1a3a" }}>
           <div style={{ fontSize: 13, fontWeight: 900, color: "#1e1a3a", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 18 }}>✨</span> AI Career Plan {"text" in result.ai_plan && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#9896b8", marginLeft: 4 }}>· {result.ai_plan.model}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#64748B", marginLeft: 4 }}>· {result.ai_plan.model}</span>
             )}
           </div>
 
@@ -227,7 +227,7 @@ export function ResultsSection({ result, onReset }: Props) {
               </div>
 
               {result.ai_plan.sources && result.ai_plan.sources.length > 0 && (
-                <div style={{ marginTop: 16, paddingTop: 14, borderTop: "2px dashed #d4ceff" }}>
+                <div style={{ marginTop: 16, paddingTop: 14, borderTop: "2px dashed #FFD6A5" }}>
                   <div style={{ ...sectionLabel, marginBottom: 8 }}>🔗 Sumber (Google Search)</div>
                   <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
                     {result.ai_plan.sources.map((s, i) => (
@@ -236,7 +236,7 @@ export function ResultsSection({ result, onReset }: Props) {
                           href={s.uri}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: "#7c6fe0", textDecoration: "underline", fontSize: 12, wordBreak: "break-all" }}
+                          style={{ color: "#0EA5E9", textDecoration: "underline", fontSize: 12, wordBreak: "break-all" }}
                         >
                           {s.title || s.uri}
                         </a>
