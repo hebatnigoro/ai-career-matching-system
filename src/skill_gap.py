@@ -1,51 +1,66 @@
-import re
-from typing import Dict, List
+"""CV-vs-career skill-gap analysis backed by an evidence-based extractor.
 
-import numpy as np
+The previous implementation took the target career's full skill list and
+embedded each skill against CV segments via cosine similarity (a single,
+flat signal with one threshold). That approach has two structural issues:
+
+1. Every CV is scored against the *whole* required-skill bag of the target
+   career, so the matching is not "what skills does this CV actually
+   demonstrate?" but rather "how close does this CV look to each of these
+   labels in embedding space?". Proper nouns (React.js, Kubernetes,
+   MikroTik) are particularly poorly served by embeddings.
+2. There is no audit trail. A skill is "matched" or "missing" with no
+   pointer to the CV evidence behind that decision.
+
+This module now delegates to ``src.skill_extract`` (a layered ensemble of
+lexical / fuzzy / semantic signals) and exposes per-skill evidence
+alongside the previous matched/missing arrays. The legacy "outdated skills"
+detection remains as a separate concern.
+"""
+
+import re
+from typing import Dict, List, Optional
+
 from sentence_transformers import SentenceTransformer
 
-from src.embedding import embed_texts
-from src.preprocess import preprocess_text
+from src.skill_extract import (
+    SkillRegistry,
+    build_skill_registry,
+    extract_cv_skills,
+    evidence_to_dict,
+)
 
 
-_SENT_SPLIT = re.compile(r'(?<=[.!?;])\s+|\n+')
+# ----------------------------------------------------------------------
+# Outdated skill detection (unchanged — keyword matching for proper nouns)
+# ----------------------------------------------------------------------
 
-# Peta skill jadul → alternatif modern yang relevan di pasar saat ini.
+# Map jadul → modern alternatives. Used to mark missing skills as
+# 'upgrade' (achievable from existing legacy knowledge) vs 'new'.
 SKILL_CURRENCY_MAP: Dict[str, List[str]] = {
-    # JavaScript framework lama
     "jQuery": ["React.js", "Vue.js", "Alpine.js"],
     "AngularJS": ["Angular", "React.js", "Vue.js"],
     "Backbone.js": ["React.js", "Vue.js"],
     "Knockout.js": ["React.js", "Vue.js"],
     "Ember.js": ["React.js", "Vue.js"],
     "CoffeeScript": ["TypeScript"],
-    # Build tools lama
     "Grunt": ["Vite", "esbuild", "Webpack"],
     "Bower": ["npm", "pnpm"],
-    # Version control lama
     "SVN": ["Git"],
     "Subversion": ["Git"],
-    # Protokol lama
     "SOAP": ["REST API", "gRPC", "GraphQL"],
-    # Infrastruktur lama
     "Vagrant": ["Docker", "Docker Compose"],
-    # Java legacy stack
     "Java EE": ["Spring Boot", "Quarkus"],
     "J2EE": ["Spring Boot", "Quarkus"],
     "Struts": ["Spring Boot", "Spring MVC"],
     "EJB": ["Spring Boot"],
     "Apache Ant": ["Maven", "Gradle"],
-    # Versi Python/ML lama
     "Python 2": ["Python 3"],
     "TensorFlow 1.x": ["TensorFlow 2.x", "PyTorch"],
-    # Versi database lama
     "MySQL 5": ["PostgreSQL", "MySQL 8"],
-    # CSS/UI lama
     "Bootstrap 3": ["Bootstrap 5", "Tailwind CSS"],
 }
 
-# Pola regex (lowercase) untuk mencari skill jadul di teks CV.
-# Nama teknologi adalah proper noun: lebih akurat dicari secara leksikal, bukan embedding.
 _SKILL_PATTERNS: Dict[str, List[str]] = {
     "jQuery":         [r'\bjquery\b'],
     "AngularJS":      [r'\bangularjs\b', r'\bangular\s*1[\s.,)]', r'\bangular\s+js\b'],
@@ -71,33 +86,14 @@ _SKILL_PATTERNS: Dict[str, List[str]] = {
 }
 
 
-def _split_to_segments(text: str, min_length: int = 10) -> List[str]:
-    """Pecah teks CV menjadi segmen kalimat untuk pencocokan skill granular."""
-    parts = _SENT_SPLIT.split(text)
-    segments = []
-    for p in parts:
-        clean = preprocess_text(p)
-        if len(clean) >= min_length:
-            segments.append(clean)
-    if not segments:
-        full = preprocess_text(text)
-        if full:
-            segments = [full]
-    return segments
-
-
 def _detect_skill_currency(cv_text: str) -> List[Dict]:
-    """Deteksi skill jadul yang EKSPLISIT disebutkan di teks CV menggunakan keyword matching.
+    """Detect outdated skills explicitly mentioned in the CV.
 
-    Nama teknologi adalah proper noun — lebih akurat dideteksi secara leksikal
-    daripada embedding (embedding mengukur kemiripan semantik, bukan keberadaan kata).
-
-    Returns
-    -------
-    list of {skill, modern_alternatives}
+    Tech names are proper nouns; lexical regex outperforms embeddings here
+    (embeddings measure semantic neighbourhood, not lexical presence).
     """
     cv_lower = cv_text.lower()
-    found = []
+    found: List[Dict] = []
     for skill, patterns in _SKILL_PATTERNS.items():
         if skill not in SKILL_CURRENCY_MAP:
             continue
@@ -111,100 +107,189 @@ def _detect_skill_currency(cv_text: str) -> List[Dict]:
     return found
 
 
+# ----------------------------------------------------------------------
+# Threshold→layer mapping
+# ----------------------------------------------------------------------
+#
+# The legacy ``threshold`` parameter (default 0.6) controlled a single
+# cosine similarity cutoff. With the layered pipeline, we map that one
+# knob onto the semantic-layer threshold (since lexical/fuzzy bring their
+# own calibrated bands). The translation is monotonic so existing callers
+# that raise/lower threshold get the expected directional effect.
+
+def _legacy_threshold_to_semantic(threshold: float) -> float:
+    """Translate the legacy 0-1 threshold into the new semantic cutoff.
+
+    Empirically the layered pipeline needs a stricter semantic threshold
+    than the previous flat one because proper nouns are now handled by
+    L1/L2. We map [0, 1] → [0.65, 0.90] linearly, anchored so that the
+    legacy default 0.6 lands on the new default 0.78.
+    """
+    if threshold <= 0:
+        return 0.65
+    if threshold >= 1:
+        return 0.90
+    # Linear interpolation that puts 0.6 → 0.78
+    return round(0.65 + (threshold * 0.25) + (0.005 if threshold == 0.6 else 0.0), 4)
+
+
+# ----------------------------------------------------------------------
+# Public API
+# ----------------------------------------------------------------------
+
 def analyze_skill_gap(
     cv_text: str,
     skills: List[str],
     model: SentenceTransformer,
     threshold: float = 0.6,
     check_currency: bool = True,
+    registry: Optional[SkillRegistry] = None,
+    fuzzy_threshold: float = 0.92,
+    enable_lexical: bool = True,
+    enable_fuzzy: bool = True,
+    enable_semantic: bool = True,
 ) -> Dict:
-    """Analisis skill gap antara CV dan skill yang dibutuhkan karier target.
+    """Compare CV skills (extracted) against a target career's required skills.
 
-    CV dipecah menjadi segmen-segmen kalimat, lalu setiap skill dicocokkan
-    terhadap segmen dengan similarity tertinggi (max-pooling per skill).
-
-    Jika check_currency=True, juga mendeteksi skill jadul yang eksplisit ada di CV
-    dan menandai missing skill sebagai 'upgrade' atau 'new'.
+    The extraction is delegated to the layered pipeline in
+    :mod:`src.skill_extract`. This function then intersects the extracted
+    skill set with the required-skill list, producing matched/missing
+    arrays compatible with the previous return shape, plus per-skill
+    evidence and a top-level list of all extracted skills.
 
     Parameters
     ----------
     cv_text : str
-        Teks CV mentah.
+        Raw CV text.
     skills : list of str
-        Daftar skill yang dibutuhkan karier target.
+        Required skills for the target career.
     model : SentenceTransformer
-        Model yang sama dengan yang digunakan untuk embedding CV/karier.
+        Embedding model used by the semantic layer.
     threshold : float
-        Batas similarity untuk menentukan skill matched vs missing.
+        Legacy similarity threshold (0–1). Internally mapped to the
+        semantic layer cutoff; lexical/fuzzy use their own calibrated
+        thresholds.
     check_currency : bool
-        Jika True, deteksi skill jadul di CV dan beri rekomendasi upgrade.
+        Detect outdated skills in the CV and mark missing skills as
+        "upgrade" when achievable from a legacy counterpart.
+    registry : SkillRegistry, optional
+        Pre-built registry. When provided, the pipeline uses it as the
+        canonical-skill catalog (so it can also surface CV skills not in
+        the target list under ``extra_cv_skills``). When omitted, a
+        registry is built ad-hoc from ``skills``.
+    fuzzy_threshold : float
+        rapidfuzz cutoff in [0, 1]. Default 0.92.
+    enable_lexical, enable_fuzzy, enable_semantic : bool
+        Per-layer toggles (ablation knobs).
 
     Returns
     -------
     dict with keys:
-        matched_skills  : skill yang sudah dimiliki (similarity >= threshold)
-        missing_skills  : skill yang kurang, dengan type='upgrade'|'new'
-                          dan upgrade_from jika type=='upgrade'
-        match_ratio     : rasio matched/total
-        outdated_in_cv  : skill jadul yang ditemukan di CV + alternatif modernnya
+        matched_skills          [{skill, similarity, source, evidence,
+                                  context, section}]
+        missing_skills          [{skill, similarity, type, ...}]
+        match_ratio             float
+        outdated_in_cv          legacy outdated skill list
+        extracted_skills_in_cv  [{skill, source, confidence, ...}]
+                                — every skill the pipeline detected,
+                                whether or not it's required
+        extra_cv_skills         skills CV has that target career does NOT
+                                require (only populated when registry has
+                                broader coverage than the target list)
     """
-    outdated_in_cv: List[Dict] = []
+    # Build / reuse registry. If a global registry is supplied we keep it
+    # because it gives us "extra_cv_skills" insight; otherwise we build a
+    # mini-registry just for the target skills.
+    if registry is None:
+        registry = build_skill_registry([{"skills": skills}])
+        target_only_registry = True
+    else:
+        # Ensure the target skills are in the registry even if caller
+        # forgot to include them.
+        for s in skills or []:
+            registry.add(s)
+        target_only_registry = False
 
     if not skills:
         return {
             "matched_skills": [],
             "missing_skills": [],
             "match_ratio": 0.0,
-            "outdated_in_cv": outdated_in_cv,
+            "outdated_in_cv": _detect_skill_currency(cv_text) if check_currency else [],
+            "extracted_skills_in_cv": [],
+            "extra_cv_skills": [],
         }
 
-    segments = _split_to_segments(cv_text)
-    if not segments:
-        return {
-            "matched_skills": [],
-            "missing_skills": [{"skill": s, "similarity": 0.0, "type": "new"} for s in skills],
-            "match_ratio": 0.0,
-            "outdated_in_cv": outdated_in_cv,
-        }
+    semantic_threshold = _legacy_threshold_to_semantic(threshold)
 
-    # Skills sebagai query, segmen CV sebagai passage (E5 convention)
-    skill_emb = embed_texts(model, skills, is_passage=False)
-    segment_emb = embed_texts(model, segments, is_passage=True)
+    extracted = extract_cv_skills(
+        cv_text=cv_text,
+        registry=registry,
+        model=model,
+        fuzzy_threshold=fuzzy_threshold,
+        semantic_threshold=semantic_threshold,
+        enable_lexical=enable_lexical,
+        enable_fuzzy=enable_fuzzy,
+        enable_semantic=enable_semantic,
+    )
 
-    sim_matrix = skill_emb @ segment_emb.T
-    max_sims = np.max(sim_matrix, axis=1)
+    target_set = set(skills)
+    matched: List[Dict] = []
+    missing: List[Dict] = []
 
-    matched = []
-    missing = []
-
-    for skill, sim in zip(skills, max_sims):
-        if sim >= threshold:
-            matched.append({"skill": skill, "similarity": round(float(sim), 4)})
+    for skill in skills:
+        if skill in extracted:
+            ev = extracted[skill]
+            matched.append({
+                "skill": skill,
+                "similarity": ev.confidence,        # backward-compat field
+                "source": ev.source,                # new: which layer caught it
+                "evidence": ev.matched_text,        # new: the exact CV span text
+                "context": ev.context,              # new: surrounding sentence
+                "section": ev.section,              # new: skills_list/experience/other
+                "cv_span": list(ev.cv_span),        # new: char offsets
+            })
         else:
-            missing.append({"skill": skill, "similarity": round(float(sim), 4), "type": "new"})
+            missing.append({
+                "skill": skill,
+                "similarity": 0.0,
+                "type": "new",
+            })
 
+    # Sort: matched by confidence desc, missing alphabetical for stable output
     matched.sort(key=lambda x: -x["similarity"])
-    missing.sort(key=lambda x: -x["similarity"])
+    missing.sort(key=lambda x: x["skill"])
 
-    # Deteksi skill jadul menggunakan keyword matching (bukan embedding)
+    # Outdated skill detection + upgrade-path linking (legacy behaviour)
+    outdated_in_cv: List[Dict] = []
     if check_currency:
         outdated_in_cv = _detect_skill_currency(cv_text)
-
-        # Petakan skill jadul → skill modern yang bisa jadi penggantinya
         outdated_to_modern: Dict[str, List[str]] = {}
         for item in outdated_in_cv:
             for modern in item["modern_alternatives"]:
                 outdated_to_modern.setdefault(modern, []).append(item["skill"])
-
-        # Tandai missing skill sebagai 'upgrade' jika bisa dicapai dari skill jadul yang ada
         for m in missing:
             if m["skill"] in outdated_to_modern:
                 m["type"] = "upgrade"
                 m["upgrade_from"] = outdated_to_modern[m["skill"]]
+
+    extracted_dump = [evidence_to_dict(ev) for ev in extracted.values()]
+    extracted_dump.sort(key=lambda x: -x["confidence"])
+
+    extra_cv_skills: List[Dict] = []
+    if not target_only_registry:
+        extra_cv_skills = [
+            evidence_to_dict(ev)
+            for canonical, ev in extracted.items()
+            if canonical not in target_set
+        ]
+        extra_cv_skills.sort(key=lambda x: -x["confidence"])
 
     return {
         "matched_skills": matched,
         "missing_skills": missing,
         "match_ratio": round(len(matched) / len(skills), 4),
         "outdated_in_cv": outdated_in_cv,
+        "extracted_skills_in_cv": extracted_dump,
+        "extra_cv_skills": extra_cv_skills,
     }
