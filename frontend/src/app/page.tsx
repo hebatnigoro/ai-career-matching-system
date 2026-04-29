@@ -39,8 +39,8 @@ export default function App() {
       <Navbar page={page} navigate={navigate} />
       <div className={anim} key={display} style={{ flex: 1 }}>
         {display === "home" && <HomeSection navigate={navigate} mouse={mouse} />}
-        {display === "how" && <HowSection navigate={navigate} />}
-        {display === "analyzer" && <AnalyzerSection />}
+        {display === "how" && <HowSection navigate={navigate} mouse={mouse} />}
+        {display === "analyzer" && <AnalyzerSection mouse={mouse} />}
       </div>
       <footer
         style={{
@@ -48,18 +48,18 @@ export default function App() {
           padding: "26px 24px",
           textAlign: "center",
           background: "#fff",
-          boxShadow: "inset 0 4px 0 #e8e5f5",
+          boxShadow: "inset 0 4px 0 #F1F5F9",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
           <span style={{ fontSize: 18 }}>🧭</span>
           <span style={{ fontWeight: 900, fontSize: 15 }}>
-            Path<span style={{ color: "#7c6fe0" }}>Drift</span>
+            Path<span style={{ color: "#0EA5E9" }}>Drift</span>
           </span>
           <span style={{ color: "#ccc" }}>·</span>
-          <span style={{ color: "#9896b8", fontWeight: 600, fontSize: 13 }}>AI Career Matching System</span>
+          <span style={{ color: "#64748B", fontWeight: 600, fontSize: 13 }}>AI Career Matching System</span>
         </div>
-        <p style={{ color: "#b8b6d4", fontSize: 12, fontWeight: 600 }}>
+        <p style={{ color: "#94A3B8", fontSize: 12, fontWeight: 600 }}>
           Built for thesis research · BERT Embeddings · FastAPI · Gemini AI
         </p>
       </footer>

@@ -21,7 +21,7 @@ export function Navbar({ page, navigate }: Props) {
         left: 0,
         right: 0,
         zIndex: 200,
-        background: "rgba(240,236,255,0.9)",
+        background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(14px)",
         borderBottom: "2.5px solid #1e1a3a",
         boxShadow: "0 4px 0 #1e1a3a",
@@ -46,7 +46,7 @@ export function Navbar({ page, navigate }: Props) {
             style={{
               width: 36,
               height: 36,
-              background: "#7c6fe0",
+              background: "#0EA5E9",
               border: "2.5px solid #1e1a3a",
               borderRadius: 10,
               display: "flex",
@@ -59,7 +59,7 @@ export function Navbar({ page, navigate }: Props) {
             🧭
           </div>
           <span style={{ fontWeight: 900, fontSize: 20, color: "#1e1a3a", letterSpacing: "-0.02em" }}>
-            Path<span style={{ color: "#7c6fe0" }}>Drift</span>
+            Path<span style={{ color: "#0EA5E9" }}>Drift</span>
           </span>
         </button>
         <div style={{ display: "flex", gap: 6 }}>
@@ -71,8 +71,8 @@ export function Navbar({ page, navigate }: Props) {
                 padding: "7px 14px",
                 borderRadius: 10,
                 border: page === p.id ? "2px solid #1e1a3a" : "2px solid transparent",
-                background: page === p.id ? "#7c6fe0" : "transparent",
-                color: page === p.id ? "#fff" : "#6a6890",
+                background: page === p.id ? "#0EA5E9" : "transparent",
+                color: page === p.id ? "#fff" : "#475569",
                 fontWeight: 800,
                 fontSize: 13,
                 cursor: "pointer",

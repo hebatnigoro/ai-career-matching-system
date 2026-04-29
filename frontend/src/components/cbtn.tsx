@@ -15,7 +15,7 @@ type Props = {
 export function CBtn({
   children,
   onClick,
-  accent = "#7c6fe0",
+  accent = "#0EA5E9",
   textColor = "#fff",
   big = false,
   disabled = false,
@@ -35,7 +35,7 @@ export function CBtn({
         borderRadius: 14,
         fontFamily: "inherit",
         border: "2.5px solid #1e1a3a",
-        background: disabled ? "#cfcae6" : accent,
+        background: disabled ? "#CBD5E1" : accent,
         color: textColor,
         fontWeight: 800,
         fontSize: big ? 15 : 13,
