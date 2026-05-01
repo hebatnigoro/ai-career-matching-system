@@ -64,6 +64,86 @@ export type TransitionContext = {
   summary: string;
 };
 
+// ---------- Job matching ----------
+
+export type JobSummary = {
+  id: string;
+  source: "greenhouse" | "lever" | "ashby";
+  company: string;
+  title: string;
+  department: string | null;
+  team: string | null;
+  location: string | null;
+  country: string | null;
+  remote: boolean;
+  workplace_type: "remote" | "hybrid" | "onsite" | "unspecified";
+  employment_type: string | null;
+  url: string | null;
+  apply_url: string | null;
+  posted_at: string | null;
+  compensation: string | null;
+};
+
+export type JobScores = {
+  semantic: number;
+  skill: number;
+  experience: number;
+  location: number;
+  final: number;
+};
+
+export type SkillMatchEntry = {
+  skill: string;
+  source: "lexical" | "fuzzy" | "semantic";
+  confidence: number;
+  evidence: string;
+};
+
+export type JobMatchResult = {
+  job: JobSummary;
+  scores: JobScores;
+  eligible: boolean;
+  skill_match: {
+    matched: SkillMatchEntry[];
+    missing: string[];
+    match_ratio: number;
+    required_skills: string[];
+  };
+  experience_match: {
+    score: number;
+    reason: string;
+    cv?: number;
+    required?: [number, number];
+    gap?: number;
+  };
+  location_match: {
+    score: number;
+    reason: string;
+    cv_city?: string;
+    job_location?: string;
+  };
+};
+
+export type CVProfile = {
+  experience_years: number | null;
+  experience_method: string | null;
+  location_city: string | null;
+  location_country: string | null;
+  remote_preference: boolean | null;
+};
+
+export type MatchJobsResponse = {
+  weights: Record<string, number>;
+  thresholds: Record<string, number>;
+  cv_profile: CVProfile;
+  candidates_considered: number;
+  filtered_out_by_pre_filter: number;
+  eligible_count: number;
+  ranked: JobMatchResult[];
+  fetched_at: string | null;
+  model: string;
+};
+
 export type AnalyzeResponse = {
   target: {
     career_id: string;

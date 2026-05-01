@@ -1,6 +1,6 @@
 "use client";
 
-export type PageId = "home" | "how" | "analyzer";
+export type PageId = "home" | "how" | "analyzer" | "jobs";
 
 type Props = {
   page: PageId;
@@ -12,6 +12,7 @@ export function Navbar({ page, navigate }: Props) {
     { id: "home", label: "🏠 Home" },
     { id: "how", label: "📖 How It Works" },
     { id: "analyzer", label: "🔬 Analyzer" },
+    { id: "jobs", label: "💼 Jobs" },
   ];
   return (
     <nav

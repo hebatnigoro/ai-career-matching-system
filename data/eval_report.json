@@ -1,0 +1,256 @@
+{
+  "per_case": [
+    {
+      "case_id": "be-jakarta-mid",
+      "n_jobs": 8,
+      "n_relevant": 5,
+      "n_perfect": 2,
+      "mrr": 1.0,
+      "eligible_count": 8,
+      "P@3": 1.0,
+      "NDCG@3": 0.9652,
+      "eligible@3": 1.0,
+      "P@5": 0.8,
+      "NDCG@5": 0.8774,
+      "eligible@5": 1.0,
+      "P@10": 0.5,
+      "NDCG@10": 0.9551,
+      "eligible@10": 0.8,
+      "_top_predictions": [
+        {
+          "rank": 1,
+          "job_id": "g1",
+          "title": "Backend Engineer",
+          "label": 2,
+          "final_score": 0.9997,
+          "eligible": true
+        },
+        {
+          "rank": 2,
+          "job_id": "g2",
+          "title": "Senior Backend Engineer",
+          "label": 1,
+          "final_score": 0.9236,
+          "eligible": true
+        },
+        {
+          "rank": 3,
+          "job_id": "g4",
+          "title": "Backend Engineer (Remote)",
+          "label": 2,
+          "final_score": 0.905,
+          "eligible": true
+        },
+        {
+          "rank": 4,
+          "job_id": "g3",
+          "title": "Junior Frontend Engineer",
+          "label": 0,
+          "final_score": 0.8239,
+          "eligible": true
+        },
+        {
+          "rank": 5,
+          "job_id": "g6",
+          "title": "DevOps Engineer",
+          "label": 1,
+          "final_score": 0.8078,
+          "eligible": true
+        },
+        {
+          "rank": 6,
+          "job_id": "g8",
+          "title": "Backend Engineer",
+          "label": 1,
+          "final_score": 0.7851,
+          "eligible": true
+        },
+        {
+          "rank": 7,
+          "job_id": "g5",
+          "title": "Marketing Specialist",
+          "label": 0,
+          "final_score": 0.7332,
+          "eligible": true
+        },
+        {
+          "rank": 8,
+          "job_id": "g7",
+          "title": "Data Analyst",
+          "label": 0,
+          "final_score": 0.6917,
+          "eligible": true
+        }
+      ]
+    },
+    {
+      "case_id": "junior-data-analyst",
+      "n_jobs": 7,
+      "n_relevant": 5,
+      "n_perfect": 3,
+      "mrr": 1.0,
+      "eligible_count": 7,
+      "P@3": 1.0,
+      "NDCG@3": 0.852,
+      "eligible@3": 1.0,
+      "P@5": 1.0,
+      "NDCG@5": 0.9519,
+      "eligible@5": 1.0,
+      "P@10": 0.5,
+      "NDCG@10": 0.9519,
+      "eligible@10": 0.7,
+      "_top_predictions": [
+        {
+          "rank": 1,
+          "job_id": "d1",
+          "title": "Junior Data Analyst",
+          "label": 2,
+          "final_score": 0.9999,
+          "eligible": true
+        },
+        {
+          "rank": 2,
+          "job_id": "d7",
+          "title": "Data Analyst",
+          "label": 1,
+          "final_score": 0.8888,
+          "eligible": true
+        },
+        {
+          "rank": 3,
+          "job_id": "d3",
+          "title": "Business Intelligence Analyst",
+          "label": 2,
+          "final_score": 0.8307,
+          "eligible": true
+        },
+        {
+          "rank": 4,
+          "job_id": "d5",
+          "title": "Data Analyst Intern",
+          "label": 1,
+          "final_score": 0.7181,
+          "eligible": true
+        },
+        {
+          "rank": 5,
+          "job_id": "d6",
+          "title": "Marketing Analyst",
+          "label": 2,
+          "final_score": 0.7,
+          "eligible": true
+        },
+        {
+          "rank": 6,
+          "job_id": "d4",
+          "title": "Backend Engineer",
+          "label": 0,
+          "final_score": 0.6658,
+          "eligible": true
+        },
+        {
+          "rank": 7,
+          "job_id": "d2",
+          "title": "Senior Data Scientist",
+          "label": 0,
+          "final_score": 0.5156,
+          "eligible": true
+        }
+      ]
+    },
+    {
+      "case_id": "senior-frontend-sg",
+      "n_jobs": 7,
+      "n_relevant": 4,
+      "n_perfect": 2,
+      "mrr": 1.0,
+      "eligible_count": 7,
+      "P@3": 1.0,
+      "NDCG@3": 0.8323,
+      "eligible@3": 1.0,
+      "P@5": 0.8,
+      "NDCG@5": 0.9522,
+      "eligible@5": 1.0,
+      "P@10": 0.4,
+      "NDCG@10": 0.9522,
+      "eligible@10": 0.7,
+      "_top_predictions": [
+        {
+          "rank": 1,
+          "job_id": "f1",
+          "title": "Senior Frontend Engineer",
+          "label": 2,
+          "final_score": 0.9932,
+          "eligible": true
+        },
+        {
+          "rank": 2,
+          "job_id": "f3",
+          "title": "Staff Frontend Engineer",
+          "label": 1,
+          "final_score": 0.9715,
+          "eligible": true
+        },
+        {
+          "rank": 3,
+          "job_id": "f6",
+          "title": "Senior Vue.js Engineer",
+          "label": 1,
+          "final_score": 0.9711,
+          "eligible": true
+        },
+        {
+          "rank": 4,
+          "job_id": "f5",
+          "title": "Frontend Engineer (Remote)",
+          "label": 2,
+          "final_score": 0.9602,
+          "eligible": true
+        },
+        {
+          "rank": 5,
+          "job_id": "f2",
+          "title": "Junior Frontend Engineer",
+          "label": 0,
+          "final_score": 0.8252,
+          "eligible": true
+        },
+        {
+          "rank": 6,
+          "job_id": "f4",
+          "title": "Backend Engineer (Java)",
+          "label": 0,
+          "final_score": 0.8118,
+          "eligible": true
+        },
+        {
+          "rank": 7,
+          "job_id": "f7",
+          "title": "DevOps Engineer",
+          "label": 0,
+          "final_score": 0.6613,
+          "eligible": true
+        }
+      ]
+    }
+  ],
+  "aggregate": {
+    "n_cases": 3,
+    "mrr": 1.0,
+    "P@3": 1.0,
+    "NDCG@3": 0.8832,
+    "eligible@3": 1.0,
+    "P@5": 0.8667,
+    "NDCG@5": 0.9272,
+    "eligible@5": 1.0,
+    "P@10": 0.4667,
+    "NDCG@10": 0.9531,
+    "eligible@10": 0.7333
+  },
+  "ks": [
+    3,
+    5,
+    10
+  ],
+  "model": "intfloat/multilingual-e5-base"
+}
