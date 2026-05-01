@@ -13,7 +13,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: 12,
   fontWeight: 800,
-  color: "#1e1a3a",
+  color: "var(--pd-text)",
   marginBottom: 8,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
@@ -24,10 +24,10 @@ const inputStyle: React.CSSProperties = {
   padding: "12px 14px",
   borderRadius: 12,
   border: "2.5px solid #1e1a3a",
-  background: "#F8FAFC",
+  background: "var(--pd-bg-soft)",
   fontFamily: "inherit",
   fontSize: 14,
-  color: "#1e1a3a",
+  color: "var(--pd-text)",
   outline: "none",
   boxShadow: "3px 3px 0 #1e1a3a",
 };
@@ -80,8 +80,8 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
               height: 32,
               borderRadius: "50%",
               border: "2.5px solid #1e1a3a",
-              background: step >= n ? "#0EA5E9" : "#fff",
-              color: step >= n ? "#fff" : "#1e1a3a",
+              background: step >= n ? "#0EA5E9" : "var(--pd-card)",
+              color: step >= n ? "#fff" : "var(--pd-text)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -116,6 +116,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
                 textAlign: "center",
                 padding: "22px 14px",
                 background: "#E0F2FE",
+                color: "#1e1a3a",
                 fontWeight: 700,
               }}
             >
@@ -123,7 +124,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             </div>
           </label>
 
-          <p style={{ fontSize: 12, color: "#64748B", marginBottom: 18, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: "var(--pd-text-faint)", marginBottom: 18, lineHeight: 1.5 }}>
             CV diekstrak server-side via PyMuPDF / python-docx. CV bilingual EN+ID didukung.
           </p>
 
@@ -159,8 +160,8 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             style={inputStyle}
             autoComplete="off"
           />
-          <p style={{ fontSize: 12, color: "#64748B", marginTop: 8, lineHeight: 1.5 }}>
-            Tidak perlu format slug — backend punya fuzzy resolver. <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>Data Analyst</code>, <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>data analyst</code>, dan <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4 }}>data-analyst</code> semua diterima.
+          <p style={{ fontSize: 12, color: "var(--pd-text-faint)", marginTop: 8, lineHeight: 1.5 }}>
+            Tidak perlu format slug — backend punya fuzzy resolver. <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4, color: "#1e1a3a" }}>Data Analyst</code>, <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4, color: "#1e1a3a" }}>data analyst</code>, dan <code style={{ background: "#E0F2FE", padding: "1px 5px", borderRadius: 4, color: "#1e1a3a" }}>data-analyst</code> semua diterima.
           </p>
 
           {targetCareerId.trim() && (
@@ -175,7 +176,7 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
           {error && <div style={{ ...errBox, marginTop: 14 }}>{error}</div>}
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 22 }}>
-            <CBtn onClick={() => setStep(1)} accent="#fff" textColor="#1e1a3a">
+            <CBtn onClick={() => setStep(1)} accent="var(--pd-card)" textColor="var(--pd-text)">
               ← Kembali
             </CBtn>
             <CBtn
@@ -197,14 +198,14 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
       {/* STEP 3 — Confirm + analyze */}
       {step === 3 && (
         <div style={{ animation: "pd-stepSlide 0.35s ease both" }}>
-          <div style={{ padding: 16, background: "#F8FAFC", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16 }}>
+          <div style={{ padding: 16, background: "var(--pd-bg-soft)", border: "2.5px solid #1e1a3a", borderRadius: 12, boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 800, color: "#0EA5E9", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
               Ringkasan
             </div>
-            <div style={{ fontSize: 13, color: "#1e1a3a", marginBottom: 4 }}>
+            <div style={{ fontSize: 13, color: "var(--pd-text)", marginBottom: 4 }}>
               <b>CV:</b> {file?.name ?? "-"}
             </div>
-            <div style={{ fontSize: 13, color: "#1e1a3a" }}>
+            <div style={{ fontSize: 13, color: "var(--pd-text)" }}>
               <b>Target karier:</b> {targetCareerId.trim()}
             </div>
           </div>
@@ -221,14 +222,14 @@ export function AnalyzerCard({ loading, onAnalyze }: Props) {
             </span>
           </label>
 
-          <p style={{ fontSize: 13, color: "#475569", marginBottom: 18, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 13, color: "var(--pd-text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
             Klik tombol di bawah untuk menjalankan analisis. Sistem akan membandingkan skills di CV kamu dengan kebutuhan karier target dan memberi roadmap pengembangan.
           </p>
 
           {error && <div style={{ ...errBox, marginBottom: 14 }}>{error}</div>}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <CBtn onClick={() => setStep(2)} accent="#fff" textColor="#1e1a3a" disabled={loading}>
+            <CBtn onClick={() => setStep(2)} accent="var(--pd-card)" textColor="var(--pd-text)" disabled={loading}>
               ← Kembali
             </CBtn>
             {loading ? (
