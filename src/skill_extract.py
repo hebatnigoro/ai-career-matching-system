@@ -38,6 +38,7 @@ to support comparative experiments.
 import re
 import unicodedata
 from dataclasses import dataclass, field, asdict
+from functools import lru_cache
 from typing import Dict, List, Optional, Set, Tuple
 
 import numpy as np
@@ -237,7 +238,16 @@ _WORD_BOUNDARY_LEFT = r"(?:^|[^a-zA-Z0-9.+#/-])"
 _WORD_BOUNDARY_RIGHT = r"(?=$|[^a-zA-Z0-9+#/-])"
 
 
+@lru_cache(maxsize=2048)
 def _build_lexical_pattern(variant: str) -> re.Pattern:
+    """Compile (and cache) the boundary-aware regex for a skill variant.
+
+    The matcher previously recompiled every variant on every call. With
+    a 128-skill registry × ~3 variants each × 150-candidate match, that
+    was ~57 000 redundant compiles per request and the dominant cost in
+    the live-fallback inference path. Caching is safe — variants are
+    canonicalized via ``_normalize_form`` before reaching this function.
+    """
     variant = _normalize_form(variant)
     escaped = re.escape(variant)
     return re.compile(

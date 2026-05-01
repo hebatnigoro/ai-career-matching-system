@@ -1,0 +1,27 @@
+{
+  "sources": [
+    { "type": "greenhouse", "board": "airbnb",   "company": "Airbnb" },
+    { "type": "greenhouse", "board": "stripe",   "company": "Stripe" },
+    { "type": "greenhouse", "board": "vercel",   "company": "Vercel" },
+    { "type": "greenhouse", "board": "gitlab",   "company": "GitLab" },
+    { "type": "greenhouse", "board": "figma",    "company": "Figma" },
+    { "type": "greenhouse", "board": "duolingo", "company": "Duolingo" },
+
+    { "type": "lever", "board": "plaid",     "company": "Plaid" },
+
+    { "type": "ashby", "board": "Ashby",     "company": "Ashby" },
+    { "type": "ashby", "board": "posthog",   "company": "PostHog" },
+    { "type": "ashby", "board": "linear",    "company": "Linear" },
+    { "type": "ashby", "board": "Notion",    "company": "Notion" },
+    { "type": "ashby", "board": "ramp",      "company": "Ramp" }
+  ],
+  "_notes": [
+    "All boards verified live (>0 jobs returned, no 404). Dead boards removed:",
+    "  - lever/leverdemo: generic demo board, dominated rankings with non-real roles",
+    "  - lever/netflix, lever/shopify: 0 results / 404 (moved to other ATSes)",
+    "  - ashby/vercel: 0 results (Vercel uses Greenhouse)",
+    "Counts (probe at 2026-04-30): GH airbnb 232, stripe 491, vercel 85, gitlab 199,",
+    "figma 154, duolingo 82; Lever plaid 94; Ashby Ashby 52, posthog 16, linear 23,",
+    "Notion 142, ramp 118. Total ~1888 live jobs across 3 ATSes."
+  ]
+}

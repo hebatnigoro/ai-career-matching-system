@@ -5,6 +5,7 @@ import { Navbar, type PageId } from "@/components/navbar";
 import { HomeSection } from "@/components/home-section";
 import { HowSection } from "@/components/how-section";
 import { AnalyzerSection } from "@/components/analyzer-section";
+import { JobsSection } from "@/components/jobs-section";
 
 export default function App() {
   const [page, setPage] = useState<PageId>("home");
@@ -41,6 +42,7 @@ export default function App() {
         {display === "home" && <HomeSection navigate={navigate} mouse={mouse} />}
         {display === "how" && <HowSection navigate={navigate} mouse={mouse} />}
         {display === "analyzer" && <AnalyzerSection mouse={mouse} />}
+        {display === "jobs" && <JobsSection />}
       </div>
       <footer
         style={{

@@ -16,6 +16,14 @@ from src.skill_gap import analyze_skill_gap
 from src.skill_extract import SkillRegistry, build_skill_registry
 from src.file_extract import extract_text_auto
 from src.ai_planner import generate_career_plan
+from src.job_sources import fetch_all
+from src.job_matcher import (
+    match_jobs_for_cv,
+    enrich_jobs_with_skills,
+    DEFAULT_WEIGHTS,
+    DEFAULT_SKILL_THRESHOLD,
+    DEFAULT_LOC_THRESHOLD,
+)
 
 
 # ---------- Data Models ----------
@@ -87,6 +95,8 @@ app.add_middleware(
 
 # ---------- Career Repository & Embedding Cache ----------
 _CAREERS_PATH = os.path.join("data", "careers.json")
+_JOB_SOURCES_PATH = os.path.join("data", "job_sources.json")
+_JOBS_CACHE_PATH = os.path.join("data", "jobs_cache.json")
 _career_repo: List[Dict] = []
 _career_index: Dict[str, Dict] = {}
 _career_ids: List[str] = []
@@ -96,6 +106,10 @@ _title_emb: Optional[np.ndarray] = None
 _skill_registry: Optional[SkillRegistry] = None
 _default_model_name = "intfloat/multilingual-e5-base"
 _RESOLVE_THRESHOLD = 0.78
+
+# Job repository (loaded from cache on demand)
+_jobs_cache: List[Dict] = []
+_jobs_cache_meta: Dict = {}
 
 
 def _load_careers_from_file() -> List[Dict]:
@@ -414,10 +428,13 @@ def analyze_single_core(
 # ---------- Endpoints ----------
 @app.get("/health")
 def health():
+    cache = _load_jobs_cache()
     return {
         "status": "ok",
         "careers_loaded": len(_career_repo),
         "embeddings_cached": _career_emb is not None,
+        "jobs_loaded": len(cache["jobs"]),
+        "jobs_fetched_at": cache["meta"].get("fetched_at"),
     }
 
 
@@ -666,3 +683,273 @@ def analyze_batch(req: AnalyzeBatchRequest):
         "count_careers": len(careers),
         "results": results,
     }
+
+
+# ----------------------------------------------------------------------
+# Job matching: data layer
+# ----------------------------------------------------------------------
+
+class WeightConfig(BaseModel):
+    semantic: float = DEFAULT_WEIGHTS["semantic"]
+    skill: float = DEFAULT_WEIGHTS["skill"]
+    experience: float = DEFAULT_WEIGHTS["experience"]
+    location: float = DEFAULT_WEIGHTS["location"]
+
+
+class JobFilters(BaseModel):
+    location: Optional[str] = None
+    remote: Optional[bool] = None
+    employment_type: Optional[str] = None
+    company: Optional[str] = None
+
+
+class MatchJobsRequest(BaseModel):
+    cv_text: str
+    weights: WeightConfig = WeightConfig()
+    filters: JobFilters = JobFilters()
+    skill_threshold: float = DEFAULT_SKILL_THRESHOLD
+    loc_threshold: float = DEFAULT_LOC_THRESHOLD
+    topk: int = 20
+    model: Optional[str] = 'intfloat/multilingual-e5-base'
+
+
+def _load_job_sources() -> List[Dict]:
+    if not os.path.exists(_JOB_SOURCES_PATH):
+        return []
+    with open(_JOB_SOURCES_PATH, 'r', encoding='utf-8') as f:
+        doc = json.load(f)
+    return doc.get('sources', [])
+
+
+def _load_jobs_cache() -> Dict:
+    """Read the on-disk jobs cache. Returns empty dict if missing."""
+    global _jobs_cache, _jobs_cache_meta
+    if _jobs_cache:
+        return {"jobs": _jobs_cache, "meta": _jobs_cache_meta}
+    if not os.path.exists(_JOBS_CACHE_PATH):
+        return {"jobs": [], "meta": {}}
+    try:
+        with open(_JOBS_CACHE_PATH, 'r', encoding='utf-8') as f:
+            doc = json.load(f)
+        _jobs_cache = doc.get('jobs', [])
+        _jobs_cache_meta = {
+            "fetched_at": doc.get("fetched_at"),
+            "errors": doc.get("errors", []),
+            "source_count": len(doc.get("sources", [])),
+        }
+        return {"jobs": _jobs_cache, "meta": _jobs_cache_meta}
+    except Exception as e:
+        return {"jobs": [], "meta": {"error": str(e)}}
+
+
+def _save_jobs_cache(payload: Dict) -> None:
+    global _jobs_cache, _jobs_cache_meta
+    with open(_JOBS_CACHE_PATH, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    _jobs_cache = payload.get('jobs', [])
+    _jobs_cache_meta = {
+        "fetched_at": payload.get("fetched_at"),
+        "errors": payload.get("errors", []),
+        "source_count": len(payload.get("sources", [])),
+    }
+
+
+# ----------------------------------------------------------------------
+# Job endpoints
+# ----------------------------------------------------------------------
+
+@app.post("/jobs/refresh")
+def jobs_refresh(
+    sources: Optional[List[Dict]] = None,
+    enrich: bool = True,
+    model: Optional[str] = None,
+):
+    """Refetch jobs from configured sources, enrich with skill inference, persist.
+
+    Pass ``sources`` in the body to override the default config in
+    ``data/job_sources.json``. Each item: ``{type, board, company}``.
+
+    When ``enrich`` is true (default), the layered skill extractor runs
+    once per job at refresh time and the inferred ``required_skills`` and
+    ``required_experience`` are stored alongside the job. This keeps
+    ``/match_jobs`` fast (the per-request hot path no longer re-extracts
+    JD skills).
+    """
+    src_list = sources if sources else _load_job_sources()
+    if not src_list:
+        raise HTTPException(status_code=400, detail="No job sources configured.")
+    result = fetch_all(src_list)
+    jobs = result["jobs"]
+
+    enrichment_meta: Dict = {"enriched": False}
+    if enrich and jobs:
+        if _skill_registry is None:
+            enrichment_meta["enriched"] = False
+            enrichment_meta["error"] = "Skill registry not initialized; run enrichment after server startup."
+        else:
+            mdl = load_model(model or _default_model_name)
+            jobs = enrich_jobs_with_skills(jobs, mdl, _skill_registry)
+            enrichment_meta = {
+                "enriched": True,
+                "model": model or _default_model_name,
+                "jobs_with_skills": sum(1 for j in jobs if j.get("inferred_skills")),
+                "jobs_with_exp_range": sum(1 for j in jobs if j.get("required_experience")),
+            }
+
+    payload = {
+        "fetched_at": result["fetched_at"],
+        "sources": src_list,
+        "jobs": jobs,
+        "errors": result["errors"],
+        "enrichment": enrichment_meta,
+    }
+    _save_jobs_cache(payload)
+    return {
+        "fetched_at": result["fetched_at"],
+        "total_jobs": len(jobs),
+        "source_count": len(src_list),
+        "errors": result["errors"],
+        "enrichment": enrichment_meta,
+    }
+
+
+@app.get("/jobs")
+def jobs_list(
+    location: Optional[str] = None,
+    remote: Optional[bool] = None,
+    employment_type: Optional[str] = None,
+    company: Optional[str] = None,
+    source: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+):
+    """Paginated job list with simple filters (no CV needed)."""
+    cache = _load_jobs_cache()
+    jobs = cache["jobs"]
+    out: List[Dict] = []
+    loc_l = (location or "").lower()
+    et_l = (employment_type or "").lower().replace(" ", "")
+    co_l = (company or "").lower()
+    src_l = (source or "").lower()
+    for j in jobs:
+        if location:
+            hay = " ".join(filter(None, [j.get("location"), j.get("country")])).lower()
+            if loc_l not in hay:
+                continue
+        if remote is True and not j.get("remote"):
+            continue
+        if employment_type:
+            et = (j.get("employment_type") or "").lower().replace(" ", "")
+            if et_l not in et:
+                continue
+        if company and co_l not in (j.get("company") or "").lower():
+            continue
+        if source and src_l != (j.get("source") or "").lower():
+            continue
+        out.append(j)
+    total = len(out)
+    sliced = out[offset:offset + limit]
+    # Trim description to keep payload lightweight for list views
+    light = [
+        {**j, "description": (j.get("description") or "")[:300]}
+        for j in sliced
+    ]
+    return {
+        "total": total,
+        "returned": len(sliced),
+        "offset": offset,
+        "limit": limit,
+        "fetched_at": cache["meta"].get("fetched_at"),
+        "jobs": light,
+    }
+
+
+@app.get("/jobs/{job_id:path}")
+def job_detail(job_id: str):
+    cache = _load_jobs_cache()
+    for j in cache["jobs"]:
+        if j.get("id") == job_id:
+            return j
+    raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+
+@app.post("/match_jobs")
+def match_jobs(req: MatchJobsRequest):
+    """Rank cached jobs against a CV with multi-criteria scoring."""
+    cache = _load_jobs_cache()
+    jobs = cache["jobs"]
+    if not jobs:
+        raise HTTPException(
+            status_code=400,
+            detail="Job cache is empty. Call POST /jobs/refresh first.",
+        )
+    if _skill_registry is None:
+        raise HTTPException(status_code=500, detail="Skill registry not initialized.")
+    model = load_model(req.model or _default_model_name)
+    result = match_jobs_for_cv(
+        cv_text=req.cv_text,
+        jobs=jobs,
+        model=model,
+        registry=_skill_registry,
+        weights=req.weights.model_dump(),
+        skill_threshold=req.skill_threshold,
+        loc_threshold=req.loc_threshold,
+        topk=req.topk,
+        filters=req.filters.model_dump(exclude_none=True),
+    )
+    result["fetched_at"] = cache["meta"].get("fetched_at")
+    result["model"] = req.model or _default_model_name
+    return result
+
+
+@app.post("/match_jobs_file")
+async def match_jobs_file(
+    file: UploadFile = File(...),
+    location: Optional[str] = Form(None),
+    remote: Optional[bool] = Form(None),
+    employment_type: Optional[str] = Form(None),
+    company: Optional[str] = Form(None),
+    w_semantic: float = Form(DEFAULT_WEIGHTS["semantic"]),
+    w_skill: float = Form(DEFAULT_WEIGHTS["skill"]),
+    w_experience: float = Form(DEFAULT_WEIGHTS["experience"]),
+    w_location: float = Form(DEFAULT_WEIGHTS["location"]),
+    skill_threshold: float = Form(DEFAULT_SKILL_THRESHOLD),
+    loc_threshold: float = Form(DEFAULT_LOC_THRESHOLD),
+    topk: int = Form(20),
+    model: Optional[str] = Form('intfloat/multilingual-e5-base'),
+):
+    """Same as /match_jobs but accepts a CV file (PDF/DOCX) upload."""
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="File kosong atau tidak dapat dibaca.")
+    extracted = extract_text_auto(file.filename or "", content, getattr(file, "content_type", None))
+    if isinstance(extracted, dict):
+        text = extracted.get("text", "")
+    elif isinstance(extracted, (tuple, list)):
+        text = extracted[0]
+    else:
+        text = extracted
+    if not isinstance(text, str):
+        text = str(text or "")
+    if not text or not text.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Teks CV tidak terdeteksi dari file. Pastikan PDF/DOCX bukan hasil scan.",
+        )
+
+    req = MatchJobsRequest(
+        cv_text=text,
+        weights=WeightConfig(
+            semantic=w_semantic, skill=w_skill,
+            experience=w_experience, location=w_location,
+        ),
+        filters=JobFilters(
+            location=location, remote=remote,
+            employment_type=employment_type, company=company,
+        ),
+        skill_threshold=skill_threshold,
+        loc_threshold=loc_threshold,
+        topk=topk,
+        model=model,
+    )
+    return match_jobs(req)

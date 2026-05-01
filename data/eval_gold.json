@@ -1,0 +1,299 @@
+{
+  "_notes": [
+    "Small thesis-grade gold set for the multi-criteria job matcher.",
+    "Each case pairs one CV with N candidate jobs. Each job has an integer relevance label:",
+    "  2 = fit         — explicit match on role + skills + seniority + location",
+    "  1 = partial fit — adjacent role, transferable skills, OR location/seniority mismatch only",
+    "  0 = no fit      — different domain, OR major skill gap, OR very wrong seniority",
+    "Labels reflect a single annotator's judgment (the author). For thesis defense,",
+    "expand this with 2-3 HR practitioners labeling independently and report inter-",
+    "annotator agreement (Cohen's kappa) before computing the metrics below."
+  ],
+  "cases": [
+    {
+      "case_id": "be-jakarta-mid",
+      "description": "Mid-level backend engineer, Jakarta, 4y experience.",
+      "cv_text": "Budi Santoso\nDomisili: Jakarta, Indonesia\n\nEXPERIENCE\nBackend Engineer at Tokopedia (Jan 2021 - Present)\n- Built backend services with Node.js and PostgreSQL\n- Designed REST APIs and microservices architecture\n- Implemented Docker-based CI/CD with GitHub Actions\n- Used Redis for caching\n\nSKILLS\nNode.js, JavaScript, TypeScript, PostgreSQL, Redis, Docker, REST API, Microservices, Git, GitHub Actions, SQL\n",
+      "jobs": [
+        {
+          "id": "g1",
+          "title": "Backend Engineer",
+          "company": "TokoX",
+          "description": "We are looking for a Backend Engineer with 3-5 years experience in Node.js and PostgreSQL. Must know REST API, Docker, microservices, Redis. Based in Jakarta.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "g2",
+          "title": "Senior Backend Engineer",
+          "company": "BukaY",
+          "description": "Senior Backend Engineer with 6+ years of experience designing scalable services in Node.js, Postgres, Redis. Lead microservices initiatives.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 1
+        },
+        {
+          "id": "g3",
+          "title": "Junior Frontend Engineer",
+          "company": "FE Co",
+          "description": "Junior frontend role: HTML, CSS, JavaScript, React. 1+ years experience. UI design sense required.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "g4",
+          "title": "Backend Engineer (Remote)",
+          "company": "Remoto",
+          "description": "Remote backend role. 3+ years Node.js, PostgreSQL, Docker, REST API. We're a distributed team.",
+          "location": "Remote",
+          "country": null,
+          "remote": true,
+          "workplace_type": "remote",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "g5",
+          "title": "Marketing Specialist",
+          "company": "BrandCo",
+          "description": "Marketing role: SEO, content writing, social media. 2+ years experience. No coding required.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "g6",
+          "title": "DevOps Engineer",
+          "company": "InfraCo",
+          "description": "DevOps role focusing on Kubernetes, Terraform, AWS, CI/CD pipelines. 3+ years infrastructure experience. Familiarity with Docker and GitHub Actions a plus.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "hybrid",
+          "employment_type": "FullTime",
+          "label": 1
+        },
+        {
+          "id": "g7",
+          "title": "Data Analyst",
+          "company": "DataCorp",
+          "description": "Data analyst position: SQL, Tableau, Excel, A/B testing. Requires 2+ years experience working with business data.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "g8",
+          "title": "Backend Engineer",
+          "company": "SGTech",
+          "description": "Backend engineer 3-5 years. Node.js, PostgreSQL, Redis, microservices. Onsite role.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 1
+        }
+      ]
+    },
+    {
+      "case_id": "junior-data-analyst",
+      "description": "Junior data analyst, 1 year experience, open to remote.",
+      "cv_text": "Sari Putri\nLocation: Bandung, Indonesia\nOpen to remote work.\n\nEXPERIENCE\nJunior Data Analyst at Telkomsel (March 2024 - Present)\n- Wrote SQL queries against the customer database\n- Built dashboards in Power BI and Tableau\n- Performed cohort analysis and A/B testing for marketing campaigns\n- Cleaned and validated CSV exports using Excel and Python pandas\n\nSKILLS\nSQL, Excel, Tableau, Power BI, Data Visualization, Statistics, A/B Testing, Data Cleaning, Python, Pandas\n",
+      "jobs": [
+        {
+          "id": "d1",
+          "title": "Junior Data Analyst",
+          "company": "AnalyticsCo",
+          "description": "Entry-level analyst: SQL, Tableau, A/B testing, Power BI. 0-2 years experience. Remote-friendly.",
+          "location": "Remote",
+          "country": null,
+          "remote": true,
+          "workplace_type": "remote",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "d2",
+          "title": "Senior Data Scientist",
+          "company": "MLCo",
+          "description": "Senior DS role: machine learning, TensorFlow, deep learning research. 6+ years experience required.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "d3",
+          "title": "Business Intelligence Analyst",
+          "company": "BICo",
+          "description": "BI analyst: Power BI, Tableau, SQL, ETL pipelines, dashboarding. 1-3 years experience.",
+          "location": "Bandung, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "hybrid",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "d4",
+          "title": "Backend Engineer",
+          "company": "BECo",
+          "description": "Backend engineer with 3+ years Node.js, PostgreSQL, Docker.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "d5",
+          "title": "Data Analyst Intern",
+          "company": "InternCo",
+          "description": "Data analyst intern. SQL and Excel basics. Looking for fresh grads or 0-1 years experience.",
+          "location": "Jakarta, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "Intern",
+          "label": 1
+        },
+        {
+          "id": "d6",
+          "title": "Marketing Analyst",
+          "company": "AdsCo",
+          "description": "Marketing analyst: Google Analytics, SQL, A/B testing, Excel, data visualization. 1+ years experience.",
+          "location": "Remote",
+          "country": null,
+          "remote": true,
+          "workplace_type": "remote",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "d7",
+          "title": "Data Analyst",
+          "company": "BankX",
+          "description": "Data analyst: SQL, Tableau, Excel, statistics. 1-3 years experience. Onsite Surabaya.",
+          "location": "Surabaya, Indonesia",
+          "country": "ID",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 1
+        }
+      ]
+    },
+    {
+      "case_id": "senior-frontend-sg",
+      "description": "Senior frontend engineer, 6 years, Singapore.",
+      "cv_text": "Lim Wei Ming\nLocation: Singapore\n\nEXPERIENCE\nSenior Frontend Engineer at Shopee (Aug 2019 - Present)\n- Led migration to React + Next.js with TypeScript\n- Built reusable design system components\n- Optimized web performance (Lighthouse scores 90+)\n- Mentored 4 junior engineers\n\nFrontend Engineer at Carousell (Jan 2018 - Jul 2019)\n- React, Redux, modern JavaScript\n\nSKILLS\nJavaScript, TypeScript, React, Next.js, Redux, HTML, CSS, Web Performance, Accessibility, REST API, Responsive Design, Vue\n",
+      "jobs": [
+        {
+          "id": "f1",
+          "title": "Senior Frontend Engineer",
+          "company": "ShopX",
+          "description": "Senior FE role: React, Next.js, TypeScript, design systems. 5+ years experience. Lead/mentor juniors.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "f2",
+          "title": "Junior Frontend Engineer",
+          "company": "StartupCo",
+          "description": "Junior FE: HTML, CSS, JavaScript, React. 0-2 years experience.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "f3",
+          "title": "Staff Frontend Engineer",
+          "company": "BigCo",
+          "description": "Staff-level frontend engineer with 8+ years experience. React, TypeScript, Next.js, accessibility, performance. Architect-level role.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "hybrid",
+          "employment_type": "FullTime",
+          "label": 1
+        },
+        {
+          "id": "f4",
+          "title": "Backend Engineer (Java)",
+          "company": "JavaCo",
+          "description": "Backend role in Java, Spring Boot, microservices. 5+ years experience.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        },
+        {
+          "id": "f5",
+          "title": "Frontend Engineer (Remote)",
+          "company": "RemoteCo",
+          "description": "Frontend engineer 4-6 years. React, TypeScript, Next.js, Redux, web performance. Fully remote.",
+          "location": "Remote",
+          "country": null,
+          "remote": true,
+          "workplace_type": "remote",
+          "employment_type": "FullTime",
+          "label": 2
+        },
+        {
+          "id": "f6",
+          "title": "Senior Vue.js Engineer",
+          "company": "VueCo",
+          "description": "Senior frontend with deep Vue.js expertise. 5+ years. JavaScript, TypeScript, web performance.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 1
+        },
+        {
+          "id": "f7",
+          "title": "DevOps Engineer",
+          "company": "Ops Co",
+          "description": "DevOps role: Kubernetes, AWS, Terraform, CI/CD. 4+ years infrastructure experience.",
+          "location": "Singapore",
+          "country": "SG",
+          "remote": false,
+          "workplace_type": "onsite",
+          "employment_type": "FullTime",
+          "label": 0
+        }
+      ]
+    }
+  ]
+}
