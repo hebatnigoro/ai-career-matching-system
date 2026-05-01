@@ -43,7 +43,7 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
 
   if (state.kind === "checking") {
     return (
-      <div style={{ ...base, background: "#fff", color: "#0EA5E9" }}>
+      <div style={{ ...base, background: "var(--pd-card)", color: "#0EA5E9" }}>
         <span
           style={{
             width: 10,
@@ -86,14 +86,14 @@ function ConnectionBadge({ state, onRetry }: { state: ConnState; onRetry: () => 
           style={{
             marginTop: 8,
             padding: "5px 12px",
-            background: "#fff",
+            background: "var(--pd-card)",
             border: "2px solid #1e1a3a",
             borderRadius: 8,
             fontSize: 11,
             fontWeight: 800,
             cursor: "pointer",
             fontFamily: "inherit",
-            color: "#1e1a3a",
+            color: "var(--pd-text)",
             boxShadow: "2px 2px 0 #1e1a3a",
           }}
         >
@@ -153,7 +153,7 @@ export function AnalyzerSection({ mouse }: { mouse: Mouse }) {
           <ConnectionBadge state={conn} onRetry={checkHealth} />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, filter: "drop-shadow(4px 6px 0px #BAE6FD)" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8, filter: "var(--pd-character-shadow-sm)" }}>
           <Businessman mouseX={mouse.x} mouseY={mouse.y} expression="focused" scale={0.6} />
         </div>
 
@@ -161,7 +161,7 @@ export function AnalyzerSection({ mouse }: { mouse: Mouse }) {
           <div
             style={{
               display: "inline-block",
-              background: "#fff",
+              background: "var(--pd-card)",
               border: "2.5px solid #1e1a3a",
               borderRadius: 100,
               padding: "5px 18px",
@@ -176,10 +176,10 @@ export function AnalyzerSection({ mouse }: { mouse: Mouse }) {
           >
             {result ? "🎉 Results Ready!" : "🔬 Career Analyzer"}
           </div>
-          <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6, color: "var(--pd-text)" }}>
             {result ? "Your Career Analysis" : "Analyze Your CV"}
           </h2>
-          <p style={{ fontSize: 14, color: "#475569" }}>
+          <p style={{ fontSize: 14, color: "var(--pd-text-muted)" }}>
             {result
               ? "Hasil analisis karier kamu di bawah ini"
               : "Upload CV dan tulis karier target · Instant AI analysis"}
@@ -188,7 +188,7 @@ export function AnalyzerSection({ mouse }: { mouse: Mouse }) {
 
         {error && <div style={errBox}>{error}</div>}
 
-        <div style={{ background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 24, boxShadow: "6px 6px 0 #1e1a3a", padding: "30px" }}>
+        <div style={{ background: "var(--pd-card)", color: "var(--pd-text)", border: "2.5px solid #1e1a3a", borderRadius: 24, boxShadow: "6px 6px 0 #1e1a3a", padding: "30px" }}>
           {!result ? (
             <AnalyzerCard loading={loading} onAnalyze={handleAnalyze} />
           ) : (

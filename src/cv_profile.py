@@ -23,6 +23,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass, asdict
+from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 
@@ -195,8 +196,11 @@ def _extract_date_ranges(text: str) -> List[Tuple[Tuple[int, int], Tuple[int, in
        — defense in depth for chaotic PDF column orders.
     """
     ranges: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
-    # Year of "now" — see module docstring for why this is hard-coded.
-    NOW = (2026, 4)
+    # Use the actual current month so an open-ended "2024 - present" reflects
+    # how long the role has been running *now*, not at the time the matcher
+    # was deployed.
+    today = datetime.now()
+    NOW = (today.year, today.month)
 
     matches = list(_MONTH_YEAR.finditer(text))
     for m in matches:
@@ -204,10 +208,6 @@ def _extract_date_ranges(text: str) -> List[Tuple[Tuple[int, int], Tuple[int, in
         if not left:
             continue
         ly, lm, l_has_month = left
-        # Reject if start side has no explicit month — almost always a
-        # graduation year ("2018-2022") or stray timestamp.
-        if not l_has_month:
-            continue
         end_pos = m.end()
         window = text[end_pos:end_pos + 40]
         sep = _RANGE_SEP.match(window)
@@ -225,8 +225,15 @@ def _extract_date_ranges(text: str) -> List[Tuple[Tuple[int, int], Tuple[int, in
         if _EDU_CONTEXT.search(leading):
             continue
 
+        # ``YYYY - Present`` is a valid ongoing-role pattern (side hustles,
+        # bare-year shorthand). Accept it — start defaults to January.
         if _PRESENT.match(rest):
             ranges.append(((ly, lm), NOW))
+            continue
+
+        # For closed ranges, reject if start side has no explicit month —
+        # ``2018 - 2022`` is the canonical graduation/education pattern.
+        if not l_has_month:
             continue
         right = _parse_year_month(rest, default_month=12)
         if not right:

@@ -25,35 +25,35 @@ export function HomeSection({ navigate, mouse }: Props) {
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", padding: "100px 24px 60px" }}>
       <div style={{ maxWidth: 920, width: "100%", display: "flex", alignItems: "center", gap: 56, flexWrap: "wrap", justifyContent: "center", position: "relative", zIndex: 1 }}>
-        <div style={{ opacity: in_ ? 1 : 0, transform: in_ ? "none" : "scale(0.8)", transition: "all 0.65s cubic-bezier(0.34,1.4,0.64,1) 0.1s", filter: "drop-shadow(5px 8px 0px #BAE6FD)" }}>
+        <div style={{ opacity: in_ ? 1 : 0, transform: in_ ? "none" : "scale(0.8)", transition: "all 0.65s cubic-bezier(0.34,1.4,0.64,1) 0.1s", filter: "var(--pd-character-shadow)" }}>
           <Businessman mouseX={mouse.x} mouseY={mouse.y} expression="happy" />
         </div>
         <div style={{ flex: 1, minWidth: 270, maxWidth: 460 }}>
-          <div style={{ ...T(200), display: "inline-flex", alignItems: "center", gap: 8, background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 100, padding: "5px 16px", fontSize: 11, fontWeight: 800, color: "#0EA5E9", boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 20, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ ...T(200), display: "inline-flex", alignItems: "center", gap: 8, background: "var(--pd-card)", border: "2.5px solid #1e1a3a", borderRadius: 100, padding: "5px 16px", fontSize: 11, fontWeight: 800, color: "#0EA5E9", boxShadow: "3px 3px 0 #1e1a3a", marginBottom: 20, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#4ECDC4", display: "inline-block" }} />
             AI-Powered Career Analysis
           </div>
-          <h1 style={{ ...T(320), fontSize: "clamp(36px,5vw,56px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.03em", marginBottom: 16, color: "#1e1a3a" }}>
+          <h1 style={{ ...T(320), fontSize: "clamp(36px,5vw,56px)", fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.03em", marginBottom: 16, color: "var(--pd-text)" }}>
             Find Your<br />
             <span style={{ color: "#0EA5E9" }}>Perfect Career</span><br />
             Path
           </h1>
-          <p style={{ ...T(420), fontSize: 15, color: "#475569", lineHeight: 1.75, marginBottom: 6 }}>
+          <p style={{ ...T(420), fontSize: 15, color: "var(--pd-text-muted)", lineHeight: 1.75, marginBottom: 6 }}>
             Upload your CV, pick a target career, and get an instant AI-powered match score, skill gap breakdown, and learning roadmap.
           </p>
-          <p style={{ ...T(460), fontSize: 13, color: "#94A3B8", fontWeight: 600, marginBottom: 34 }}>
+          <p style={{ ...T(460), fontSize: 13, color: "var(--pd-text-faint)", fontWeight: 600, marginBottom: 34 }}>
             Unggah CV kamu dan temukan jalur karier terbaik.
           </p>
           <div style={{ ...T(540), display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 36 }}>
             <CBtn big onClick={() => navigate("analyzer")}>🚀 Analyze My CV</CBtn>
-            <CBtn big onClick={() => navigate("how")} accent="#fff" textColor="#1e1a3a">📖 How It Works</CBtn>
+            <CBtn big onClick={() => navigate("how")} accent="var(--pd-card)" textColor="var(--pd-text)">📖 How It Works</CBtn>
           </div>
           <div style={{ ...T(640), display: "flex", gap: 12, flexWrap: "wrap" }}>
             {([["50+", "Career Profiles", "💼"], ["BERT", "Embeddings", "🤖"], ["Gemini", "AI Plans", "✨"]] as const).map(([v, l, ic], i) => (
-              <div key={i} style={{ background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 14, padding: "10px 16px", boxShadow: "3px 3px 0 #1e1a3a", textAlign: "center", minWidth: 84 }}>
+              <div key={i} style={{ background: "var(--pd-card)", border: "2.5px solid #1e1a3a", borderRadius: 14, padding: "10px 16px", boxShadow: "3px 3px 0 #1e1a3a", textAlign: "center", minWidth: 84 }}>
                 <div style={{ fontSize: 18, marginBottom: 2 }}>{ic}</div>
                 <div style={{ fontWeight: 900, fontSize: 16, color: "#0EA5E9" }}>{v}</div>
-                <div style={{ fontSize: 10, color: "#64748B", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>{l}</div>
+                <div style={{ fontSize: 10, color: "var(--pd-text-faint)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>{l}</div>
               </div>
             ))}
           </div>

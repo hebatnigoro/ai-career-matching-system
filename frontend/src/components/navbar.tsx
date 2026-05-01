@@ -1,11 +1,66 @@
 "use client";
 
+import { useTheme } from "@/lib/theme";
+
 export type PageId = "home" | "how" | "analyzer" | "jobs";
 
 type Props = {
   page: PageId;
   navigate: (to: PageId) => void;
 };
+
+function ThemeToggle() {
+  const { theme, toggle, mounted } = useTheme();
+  const isDark = theme === "dark";
+  // Pre-hydration: render a neutral, theme-independent placeholder so the
+  // server HTML and the first client render are identical. Once mounted,
+  // we know the real theme (set by the inline script in layout.tsx) and
+  // can swap in the proper icon/colors.
+  const baseStyle: React.CSSProperties = {
+    width: 36,
+    height: 36,
+    marginLeft: 6,
+    borderRadius: 10,
+    border: "2.5px solid #1e1a3a",
+    fontSize: 16,
+    fontWeight: 800,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    boxShadow: "2px 2px 0 #1e1a3a",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s, color 0.15s",
+  };
+
+  if (!mounted) {
+    return (
+      <button
+        aria-hidden
+        tabIndex={-1}
+        suppressHydrationWarning
+        style={{ ...baseStyle, background: "transparent", color: "transparent", cursor: "default" }}
+      >
+        ☀️
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      style={{
+        ...baseStyle,
+        background: isDark ? "#1e1a3a" : "#FDE68A",
+        color: isDark ? "#FDE68A" : "#1e1a3a",
+      }}
+    >
+      {isDark ? "🌙" : "☀️"}
+    </button>
+  );
+}
 
 export function Navbar({ page, navigate }: Props) {
   const pages: { id: PageId; label: string }[] = [
@@ -22,7 +77,7 @@ export function Navbar({ page, navigate }: Props) {
         left: 0,
         right: 0,
         zIndex: 200,
-        background: "rgba(255,255,255,0.92)",
+        background: "var(--pd-nav-bg)",
         backdropFilter: "blur(14px)",
         borderBottom: "2.5px solid #1e1a3a",
         boxShadow: "0 4px 0 #1e1a3a",
@@ -59,11 +114,11 @@ export function Navbar({ page, navigate }: Props) {
           >
             🧭
           </div>
-          <span style={{ fontWeight: 900, fontSize: 20, color: "#1e1a3a", letterSpacing: "-0.02em" }}>
+          <span style={{ fontWeight: 900, fontSize: 20, color: "var(--pd-text)", letterSpacing: "-0.02em" }}>
             Path<span style={{ color: "#0EA5E9" }}>Drift</span>
           </span>
         </button>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {pages.map((p) => (
             <button
               key={p.id}
@@ -73,7 +128,7 @@ export function Navbar({ page, navigate }: Props) {
                 borderRadius: 10,
                 border: page === p.id ? "2px solid #1e1a3a" : "2px solid transparent",
                 background: page === p.id ? "#0EA5E9" : "transparent",
-                color: page === p.id ? "#fff" : "#475569",
+                color: page === p.id ? "#fff" : "var(--pd-text-muted)",
                 fontWeight: 800,
                 fontSize: 13,
                 cursor: "pointer",
@@ -86,6 +141,7 @@ export function Navbar({ page, navigate }: Props) {
               {p.label}
             </button>
           ))}
+          <ThemeToggle />
         </div>
       </div>
     </nav>

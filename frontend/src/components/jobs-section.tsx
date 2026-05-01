@@ -9,7 +9,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: 11,
   fontWeight: 800,
-  color: "#1e1a3a",
+  color: "var(--pd-text)",
   marginBottom: 6,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
@@ -20,10 +20,10 @@ const inputStyle: React.CSSProperties = {
   padding: "10px 12px",
   borderRadius: 10,
   border: "2.5px solid #1e1a3a",
-  background: "#F8FAFC",
+  background: "var(--pd-bg-soft)",
   fontFamily: "inherit",
   fontSize: 13,
-  color: "#1e1a3a",
+  color: "var(--pd-text)",
   outline: "none",
   boxShadow: "2px 2px 0 #1e1a3a",
 };
@@ -60,7 +60,7 @@ function ScoreBar({ name, value, color }: { name: string; value: number; color: 
   const pct = Math.max(0, Math.min(1, value)) * 100;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
-      <div style={{ width: 78, fontWeight: 800, color: "#475569", textTransform: "uppercase", letterSpacing: "0.04em", fontSize: 10 }}>
+      <div style={{ width: 78, fontWeight: 800, color: "var(--pd-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontSize: 10 }}>
         {name}
       </div>
       <div
@@ -118,7 +118,8 @@ function JobCard({ result }: { result: JobMatchResult }) {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--pd-card)",
+        color: "var(--pd-text)",
         border: "2.5px solid #1e1a3a",
         borderRadius: 18,
         boxShadow: "4px 4px 0 #1e1a3a",
@@ -160,10 +161,10 @@ function JobCard({ result }: { result: JobMatchResult }) {
               </span>
             )}
           </div>
-          <h3 style={{ fontSize: 17, fontWeight: 900, color: "#1e1a3a", marginBottom: 4, lineHeight: 1.3 }}>
+          <h3 style={{ fontSize: 17, fontWeight: 900, color: "var(--pd-text)", marginBottom: 4, lineHeight: 1.3 }}>
             {j.title}
           </h3>
-          <div style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>
+          <div style={{ fontSize: 13, color: "var(--pd-text-muted)", fontWeight: 600 }}>
             {j.company}
             {j.location ? ` · ${j.location}` : ""}
             {j.workplace_type && j.workplace_type !== "unspecified"
@@ -205,10 +206,10 @@ function JobCard({ result }: { result: JobMatchResult }) {
             padding: "6px 12px",
             border: "2px solid #1e1a3a",
             borderRadius: 10,
-            background: "#fff",
+            background: "var(--pd-card)",
             fontSize: 12,
             fontWeight: 800,
-            color: "#1e1a3a",
+            color: "var(--pd-text)",
             cursor: "pointer",
             fontFamily: "inherit",
             boxShadow: "2px 2px 0 #1e1a3a",
@@ -239,11 +240,11 @@ function JobCard({ result }: { result: JobMatchResult }) {
       </div>
 
       {open && (
-        <div style={{ marginTop: 16, padding: "14px 16px", background: "#F8FAFC", borderRadius: 12, border: "2px dashed #94A3B8" }}>
+        <div style={{ marginTop: 16, padding: "14px 16px", background: "var(--pd-bg-soft)", borderRadius: 12, border: "2px dashed #94A3B8" }}>
           <div style={{ marginBottom: 12 }}>
             <div style={{ ...labelStyle, marginBottom: 6 }}>Matched skills ({result.skill_match.matched.length}/{result.skill_match.required_skills.length})</div>
             {result.skill_match.matched.length === 0 && (
-              <div style={{ fontSize: 12, color: "#64748B" }}>No required skills matched.</div>
+              <div style={{ fontSize: 12, color: "var(--pd-text-muted)" }}>No required skills matched.</div>
             )}
             {result.skill_match.matched.map((m) => (
               <Pill key={m.skill} color="#1e1a3a" bg="#D8F5E5">
@@ -261,7 +262,7 @@ function JobCard({ result }: { result: JobMatchResult }) {
             </div>
           )}
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, fontSize: 12, color: "#475569" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, fontSize: 12, color: "var(--pd-text-muted)" }}>
             <div>
               <strong>Experience:</strong> {result.experience_match.reason}
               {result.experience_match.cv !== undefined && result.experience_match.required && (
@@ -322,7 +323,7 @@ function FilterRow({
       </div>
       <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 4 }}>
         <label style={{ ...labelStyle, marginBottom: 8 }}>Remote only</label>
-        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "#475569" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, fontWeight: 700, color: "var(--pd-text-muted)" }}>
           <input
             type="checkbox"
             checked={filters.remote}
@@ -398,7 +399,7 @@ export function JobsSection() {
           <div
             style={{
               display: "inline-block",
-              background: "#fff",
+              background: "var(--pd-card)",
               border: "2.5px solid #1e1a3a",
               borderRadius: 100,
               padding: "5px 18px",
@@ -413,10 +414,10 @@ export function JobsSection() {
           >
             💼 Live Job Matcher
           </div>
-          <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6, color: "var(--pd-text)" }}>
             Find Jobs That Fit Your CV
           </h2>
-          <p style={{ fontSize: 14, color: "#475569" }}>
+          <p style={{ fontSize: 14, color: "var(--pd-text-muted)" }}>
             Real postings from Greenhouse, Lever &amp; Ashby. Ranked by skill, experience, and location fit.
           </p>
         </div>
@@ -440,7 +441,7 @@ export function JobsSection() {
           </div>
         )}
 
-        <div style={{ background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 24, boxShadow: "6px 6px 0 #1e1a3a", padding: 26, marginBottom: 24 }}>
+        <div style={{ background: "var(--pd-card)", color: "var(--pd-text)", border: "2.5px solid #1e1a3a", borderRadius: 24, boxShadow: "6px 6px 0 #1e1a3a", padding: 26, marginBottom: 24 }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "end", marginBottom: 16 }}>
             <div>
               <label style={labelStyle}>CV file (PDF / DOCX)</label>
@@ -451,7 +452,7 @@ export function JobsSection() {
                 style={{ ...inputStyle, padding: "8px 10px" }}
               />
               {file && (
-                <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: "var(--pd-text-muted)", marginTop: 4 }}>
                   ✓ {file.name} ({(file.size / 1024).toFixed(1)} KB)
                 </div>
               )}
@@ -474,17 +475,17 @@ export function JobsSection() {
           <div>
             <div
               style={{
-                background: "#fff",
+                background: "var(--pd-card)",
                 border: "2.5px solid #1e1a3a",
                 borderRadius: 18,
                 padding: "16px 20px",
                 boxShadow: "4px 4px 0 #1e1a3a",
                 marginBottom: 18,
                 fontSize: 13,
-                color: "#475569",
+                color: "var(--pd-text-muted)",
               }}
             >
-              <div style={{ marginBottom: 6, fontWeight: 800, color: "#1e1a3a" }}>
+              <div style={{ marginBottom: 6, fontWeight: 800, color: "var(--pd-text)" }}>
                 Detected from your CV
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
@@ -512,7 +513,7 @@ export function JobsSection() {
             </div>
 
             {result.ranked.length === 0 ? (
-              <div style={{ textAlign: "center", color: "#475569", padding: 30 }}>
+              <div style={{ textAlign: "center", color: "var(--pd-text-muted)", padding: 30 }}>
                 No jobs match the current filters. Try loosening them or refresh the cache.
               </div>
             ) : (

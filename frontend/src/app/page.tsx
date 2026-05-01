@@ -49,8 +49,8 @@ export default function App() {
           borderTop: "2.5px solid #1e1a3a",
           padding: "26px 24px",
           textAlign: "center",
-          background: "#fff",
-          boxShadow: "inset 0 4px 0 #F1F5F9",
+          background: "var(--pd-card)",
+          color: "var(--pd-text)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 6 }}>
@@ -58,10 +58,10 @@ export default function App() {
           <span style={{ fontWeight: 900, fontSize: 15 }}>
             Path<span style={{ color: "#0EA5E9" }}>Drift</span>
           </span>
-          <span style={{ color: "#ccc" }}>·</span>
-          <span style={{ color: "#64748B", fontWeight: 600, fontSize: 13 }}>AI Career Matching System</span>
+          <span style={{ color: "var(--pd-text-muted)", opacity: 0.5 }}>·</span>
+          <span style={{ color: "var(--pd-text-muted)", fontWeight: 600, fontSize: 13 }}>AI Career Matching System</span>
         </div>
-        <p style={{ color: "#94A3B8", fontSize: 12, fontWeight: 600 }}>
+        <p style={{ color: "var(--pd-text-muted)", fontSize: 12, fontWeight: 600, opacity: 0.8 }}>
           Built for thesis research · BERT Embeddings · FastAPI · Gemini AI
         </p>
       </footer>

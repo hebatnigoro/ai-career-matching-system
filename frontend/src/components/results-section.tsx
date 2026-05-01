@@ -17,7 +17,7 @@ function scoreColor(p: number) {
 const sectionLabel: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 800,
-  color: "#1e1a3a",
+  color: "var(--pd-text)",
   marginBottom: 10,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
@@ -73,10 +73,10 @@ export function ResultsSection({ result, onReset }: Props) {
             </div>
           </div>
         </div>
-        <div style={{ fontSize: 16, fontWeight: 900, color: "#1e1a3a" }}>
+        <div style={{ fontSize: 16, fontWeight: 900, color: "var(--pd-text)" }}>
           {result.target.title}
           {result.target.field && (
-            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#0EA5E9", background: "#fff", border: "2px solid #1e1a3a", borderRadius: 100, padding: "2px 10px", boxShadow: "2px 2px 0 #1e1a3a", verticalAlign: "middle" }}>
+            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 800, color: "#0EA5E9", background: "var(--pd-card)", border: "2px solid #1e1a3a", borderRadius: 100, padding: "2px 10px", boxShadow: "2px 2px 0 #1e1a3a", verticalAlign: "middle" }}>
               {result.target.field}
             </span>
           )}
@@ -85,9 +85,9 @@ export function ResultsSection({ result, onReset }: Props) {
           Status: {result.status}
         </div>
         {result.target.resolved_from && (
-          <div style={{ marginTop: 6, fontSize: 11, color: "#64748B" }}>
-            Input <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4 }}>{result.target.resolved_from}</code> →{" "}
-            <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4 }}>{result.target.career_id}</code>
+          <div style={{ marginTop: 6, fontSize: 11, color: "var(--pd-text-faint)" }}>
+            Input <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4, color: "#1e1a3a" }}>{result.target.resolved_from}</code> →{" "}
+            <code style={{ background: "#E0F2FE", padding: "1px 6px", borderRadius: 4, color: "#1e1a3a" }}>{result.target.career_id}</code>
           </div>
         )}
       </div>
@@ -154,7 +154,7 @@ export function ResultsSection({ result, onReset }: Props) {
                   display: "flex",
                   gap: 12,
                   padding: 14,
-                  background: r.career_id === result.target.career_id ? "#E0F2FE" : "#F8FAFC",
+                  background: r.career_id === result.target.career_id ? "#E0F2FE" : "var(--pd-bg-soft)",
                   border: "2.5px solid #1e1a3a",
                   borderRadius: 12,
                   boxShadow: "3px 3px 0 #1e1a3a",
@@ -180,14 +180,17 @@ export function ResultsSection({ result, onReset }: Props) {
                   {r.rank}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: "#1e1a3a" }}>
+                  {/* Top-row card uses light blue background (E0F2FE) so its
+                      text stays #1e1a3a; alternates pick up the themed
+                      pd-bg-soft surface and themed text. */}
+                  <div style={{ fontSize: 14, fontWeight: 900, color: r.career_id === result.target.career_id ? "#1e1a3a" : "var(--pd-text)" }}>
                     {r.title}
                     {r.field && (
                       <span style={{ marginLeft: 8, fontSize: 10, fontWeight: 800, color: "#0EA5E9" }}>[{r.field}]</span>
                     )}
                   </div>
                 </div>
-                <div style={{ fontSize: 13, fontFamily: "ui-monospace, monospace", fontWeight: 800, color: "#1e1a3a" }}>
+                <div style={{ fontSize: 13, fontFamily: "ui-monospace, monospace", fontWeight: 800, color: r.career_id === result.target.career_id ? "#1e1a3a" : "var(--pd-text)" }}>
                   {pct(r.score)}%
                 </div>
               </div>
@@ -198,10 +201,10 @@ export function ResultsSection({ result, onReset }: Props) {
 
       {/* AI Plan */}
       {result.ai_plan && (
-        <div style={{ marginBottom: 22, padding: 20, background: "#fff", border: "2.5px solid #1e1a3a", borderRadius: 16, boxShadow: "5px 5px 0 #1e1a3a" }}>
-          <div style={{ fontSize: 13, fontWeight: 900, color: "#1e1a3a", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ marginBottom: 22, padding: 20, background: "var(--pd-card)", border: "2.5px solid #1e1a3a", borderRadius: 16, boxShadow: "5px 5px 0 #1e1a3a" }}>
+          <div style={{ fontSize: 13, fontWeight: 900, color: "var(--pd-text)", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 18 }}>✨</span> AI Career Plan {"text" in result.ai_plan && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#64748B", marginLeft: 4 }}>· {result.ai_plan.model}</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--pd-text-faint)", marginLeft: 4 }}>· {result.ai_plan.model}</span>
             )}
           </div>
 
@@ -222,7 +225,7 @@ export function ResultsSection({ result, onReset }: Props) {
             </div>
           ) : (
             <>
-              <div className="pd-md" style={{ fontSize: 14, color: "#1e1a3a" }}>
+              <div className="pd-md" style={{ fontSize: 14, color: "var(--pd-text)" }}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.ai_plan.text}</ReactMarkdown>
               </div>
 
