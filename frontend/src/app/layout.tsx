@@ -41,6 +41,12 @@ export default function RootLayout({
       className={`${jakarta.variable} h-full antialiased`}
     >
       <head>
+        {/* Opt out of the Dark Reader extension — it injects its own
+            data-darkreader-* attributes and --darkreader-inline-* CSS
+            variables into every styled element *before* React hydrates,
+            which surfaces as a hydration-mismatch error. We already
+            ship a first-party dark theme, so Dark Reader is redundant. */}
+        <meta name="darkreader-lock" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
