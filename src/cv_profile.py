@@ -305,32 +305,21 @@ def extract_experience_years(cv_text: str) -> Tuple[Optional[float], Optional[st
 # Location extraction
 # ----------------------------------------------------------------------
 #
-# Indonesian-first city gazetteer. We don't need to be exhaustive — a
-# reasonable Big-City list is enough for the thesis prototype. Free-text
-# "City, Country" patterns also bypass the gazetteer.
+# Backed by the GeoNames database (via the offline ``geonamescache``
+# package): ~32k cities with population ≥15k and 252 countries, each with
+# ISO-2 codes and alternate-name lists. No external API calls — the data
+# ships with the package and is loaded lazily on first use.
+#
+# A CV's location is resolved in three stages:
+#   1. Explicit header (``Location: ...`` / ``Domisili: ...``) — exact
+#      lookup, then fuzzy lookup for typo tolerance.
+#   2. Whole-CV n-gram scan against the gazetteer; ranked by population
+#      and weighted toward cities matching any country mentioned in the
+#      CV body.
+#   3. Country-only fallback (e.g. CV says ``Indonesia`` but no city) —
+#      returns ``(None, ISO)`` instead of giving up.
 
-_ID_CITIES = {
-    # Major Indonesian cities — display name → ISO country code
-    "jakarta": "ID", "bandung": "ID", "surabaya": "ID", "medan": "ID",
-    "semarang": "ID", "yogyakarta": "ID", "yogya": "ID", "jogja": "ID",
-    "denpasar": "ID", "bali": "ID", "makassar": "ID", "palembang": "ID",
-    "bekasi": "ID", "tangerang": "ID", "depok": "ID", "bogor": "ID",
-    "malang": "ID", "balikpapan": "ID", "manado": "ID", "pekanbaru": "ID",
-    "batam": "ID", "padang": "ID", "samarinda": "ID", "banjarmasin": "ID",
-    "pontianak": "ID", "solo": "ID", "surakarta": "ID",
-}
-
-_GLOBAL_CITIES = {
-    "singapore": "SG", "kuala lumpur": "MY", "bangkok": "TH",
-    "manila": "PH", "ho chi minh": "VN", "hanoi": "VN",
-    "tokyo": "JP", "seoul": "KR", "hong kong": "HK", "taipei": "TW",
-    "sydney": "AU", "melbourne": "AU", "london": "GB", "berlin": "DE",
-    "amsterdam": "NL", "paris": "FR", "new york": "US", "san francisco": "US",
-    "boston": "US", "seattle": "US", "austin": "US", "chicago": "US",
-    "toronto": "CA", "vancouver": "CA", "dublin": "IE", "stockholm": "SE",
-}
-
-_CITY_LOOKUP = {**_ID_CITIES, **_GLOBAL_CITIES}
+from functools import lru_cache
 
 _LOC_HEADERS = re.compile(
     r"(?:^|\n)\s*(?:address|location|domicile|domisili|alamat|based\s+in|"
@@ -344,48 +333,285 @@ _REMOTE_PHRASES = re.compile(
     re.IGNORECASE,
 )
 
+_TOKEN_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*")
+_ALT_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z\s'\-]+$")
+_FUZZY_CUTOFF = 90
+_MAX_NGRAM = 3
+_MIN_UNIGRAM_LEN = 4   # single-token matches must be ≥4 chars to avoid stop-word hits
+_MIN_PHRASE_LEN = 5    # safety net for multi-token matches
+# Common English / Indonesian stop-words and prose tokens that overlap with
+# obscure alt-names in the GeoNames data ("and" → Anderson alt, etc.).
+_STOPWORDS = frozenset({
+    "and", "the", "for", "with", "from", "into", "over", "this", "that",
+    "what", "when", "where", "while", "have", "been", "more", "than", "into",
+    "your", "their", "they", "them", "also", "any", "all", "are", "but",
+    "dan", "atau", "yang", "untuk", "saya", "kami", "kita", "dari", "pada",
+    "ini", "itu", "ada", "akan", "tidak", "sudah", "dengan", "adalah",
+    "career", "profile", "resume", "summary", "skills", "experience",
+    "education", "project", "projects", "company", "engineer", "developer",
+    "manager", "designer", "intern", "student", "university", "college",
+    "bachelor", "master", "degree", "language", "english", "indonesian",
+})
+# Common country aliases not present in GeoNames' canonical names.
+_COUNTRY_ALIASES = {
+    "usa": "US", "us": "US",
+    "uk": "GB", "great britain": "GB", "britain": "GB",
+    "south korea": "KR", "korea": "KR",
+    "russia": "RU", "vietnam": "VN", "uae": "AE",
+}
+
 
 def _normalize(text: str) -> str:
-    return unicodedata.normalize("NFKC", text or "").lower()
+    """NFKC + lowercase + strip diacritics. Used for case/accent-insensitive
+    lookups against the gazetteer."""
+    if not text:
+        return ""
+    n = unicodedata.normalize("NFKD", text).lower()
+    return "".join(ch for ch in n if not unicodedata.combining(ch))
+
+
+@lru_cache(maxsize=1)
+def _gazetteer() -> Tuple[Dict[str, Tuple[str, str, int]], Dict[str, str], Dict[str, str]]:
+    """Build the city + country lookup tables from GeoNames data.
+
+    Returned dicts:
+        cities          name_norm → (display_name, iso2, population)
+        country_names   name_norm → iso2  (full names + multi-char aliases — safe for body scans)
+        country_codes   code_norm → iso2  (iso2 / iso3 — for explicit-header lookup only)
+
+    Cities with shared names (e.g. 'San Jose' in CR/US/PH) are
+    deduplicated by population — the largest wins. Alternate names
+    are included only if they are ASCII (skipping CJK/Cyrillic
+    transliterations to keep the table compact and avoid common-word
+    collisions in latin-script CVs).
+    """
+    import geonamescache  # local import — keeps test-only modules cheap
+    gc = geonamescache.GeonamesCache()
+    raw_cities = list(gc.get_cities().values())
+
+    # Two-pass build:
+    #   Pass 1 — primary canonical names. These are authoritative; they
+    #            must never be overwritten by an alternate-name collision.
+    #   Pass 2 — ASCII alternate names, skipped when the key is already
+    #            owned by a primary or by a stop word. Without this split,
+    #            obscure alt names ("Jayapura" listed under Jaipur, "And"
+    #            under Anderson) would shadow the real primaries.
+    cities_by_name: Dict[str, Tuple[str, str, int]] = {}
+    primary_keys: set = set()
+    for c in raw_cities:
+        pop = int(c.get("population") or 0)
+        iso = c.get("countrycode") or ""
+        if not iso:
+            continue
+        key = _normalize(c["name"])
+        if not key or len(key) < 3 or key in _STOPWORDS:
+            continue
+        existing = cities_by_name.get(key)
+        if existing is None or pop > existing[2]:
+            cities_by_name[key] = (c["name"], iso, pop)
+        primary_keys.add(key)
+
+    for c in raw_cities:
+        pop = int(c.get("population") or 0)
+        iso = c.get("countrycode") or ""
+        if not iso:
+            continue
+        for alt in c.get("alternatenames") or []:
+            if not (3 <= len(alt) <= 30) or not _ALT_NAME_RE.match(alt):
+                continue
+            key = _normalize(alt)
+            if not key or len(key) < 3 or key in _STOPWORDS or key in primary_keys:
+                continue
+            existing = cities_by_name.get(key)
+            if existing is None or pop > existing[2]:
+                cities_by_name[key] = (c["name"], iso, pop)
+
+    # Country tables are split: names go into the body-safe dict (long
+    # enough to use with \b regex without matching prose tokens), codes
+    # go into a separate dict used only when parsing explicit ``Location:``
+    # headers — never for whole-document scans, where 2-char codes like
+    # AD/AT/KM would collide with random word fragments.
+    country_names: Dict[str, str] = {}
+    country_codes: Dict[str, str] = {}
+    for iso, info in gc.get_countries().items():
+        country_names[_normalize(info["name"])] = iso
+        country_codes[iso.lower()] = iso
+        if info.get("iso3"):
+            country_codes[info["iso3"].lower()] = iso
+    country_names.update({_normalize(k): v for k, v in _COUNTRY_ALIASES.items()})
+    country_names.pop("", None)
+    country_codes.pop("", None)
+
+    return cities_by_name, country_names, country_codes
+
+
+def _detect_country_isos(text_norm: str, country_names: Dict[str, str]) -> set:
+    """Return ISO codes mentioned anywhere in normalized CV text. Only
+    full country names (≥4 chars) are considered — ISO-2 codes like
+    ``AD`` collide with prose tokens and would yield false positives."""
+    found = set()
+    for name, iso in country_names.items():
+        if len(name) < 4:
+            continue
+        if re.search(rf"\b{re.escape(name)}\b", text_norm):
+            found.add(iso)
+    return found
+
+
+def _lookup_city(
+    text_norm: str,
+    cities: Dict[str, Tuple[str, str, int]],
+    *,
+    fuzzy: bool,
+) -> Optional[Tuple[str, str]]:
+    """Match a single normalized phrase against the gazetteer. Tries exact
+    hit, then optionally fuzzy (rapidfuzz token-set) for typo tolerance."""
+    hit = cities.get(text_norm)
+    if hit:
+        return hit[0], hit[1]
+    if fuzzy and 5 <= len(text_norm) <= 30:
+        # ``QRatio`` compares full strings (no substring inflation), so a
+        # 7-char query can't ride a 3-char prefix to a 90-score match the
+        # way ``WRatio`` would. Combined with the ``_FUZZY_CUTOFF`` of 90,
+        # this rejects most spurious hits while still tolerating typos.
+        from rapidfuzz import process, fuzz
+        match = process.extractOne(
+            text_norm, cities.keys(), scorer=fuzz.QRatio, score_cutoff=_FUZZY_CUTOFF,
+        )
+        if match:
+            display, iso, _pop = cities[match[0]]
+            return display, iso
+    return None
+
+
+def _scan_for_city(
+    cv_text: str,
+    cities: Dict[str, Tuple[str, str, int]],
+    country_names: Dict[str, str],
+) -> Optional[Tuple[str, str]]:
+    """Whole-CV n-gram scan. Picks the gazetteer match with the highest
+    population, with a multiplier when the city's country is also
+    mentioned somewhere in the CV (helps disambiguate ``San Francisco``
+    when the CV clearly says ``Indonesia``)."""
+    norm_text = _normalize(cv_text)
+    declared_isos = _detect_country_isos(norm_text, country_names)
+    tokens = _TOKEN_RE.findall(norm_text)
+    if not tokens:
+        return None
+
+    best: Optional[Tuple[float, str, str]] = None  # (score, display, iso)
+    seen: set = set()
+    for i in range(len(tokens)):
+        for n in range(1, _MAX_NGRAM + 1):
+            if i + n > len(tokens):
+                break
+            phrase = " ".join(tokens[i : i + n])
+            if phrase in seen:
+                continue
+            seen.add(phrase)
+            min_len = _MIN_UNIGRAM_LEN if n == 1 else _MIN_PHRASE_LEN
+            if len(phrase) < min_len or phrase in _STOPWORDS:
+                continue
+            entry = cities.get(phrase)
+            if not entry:
+                continue
+            display, iso, pop = entry
+            # When the CV explicitly names a country, treat that as a hard
+            # filter rather than a soft bias — otherwise large foreign
+            # cities (Jaipur, Tokyo) outrank the candidate's smaller home
+            # city even when ``Indonesia`` is written one line above.
+            if declared_isos and iso not in declared_isos:
+                continue
+            score = float(pop)
+            if best is None or score > best[0]:
+                best = (score, display, iso)
+
+    if best:
+        return best[1], best[2]
+    return None
+
+
+def _resolve_header_line(
+    line: str,
+    cities: Dict[str, Tuple[str, str, int]],
+    country_names: Dict[str, str],
+    country_codes: Dict[str, str],
+) -> Optional[Tuple[str, str]]:
+    """Resolve an explicit ``Location: ...`` line. Tries the line as a
+    whole, then each comma-separated segment, with fuzzy fallback. ISO-2
+    codes are honored here (``Jakarta, ID``) because the structured
+    header context makes them unambiguous."""
+    line_norm = _normalize(line)
+    segments = [s.strip() for s in line_norm.split(",") if s.strip()]
+    header_country = {**country_names, **country_codes}
+
+    for candidate in [line_norm] + segments:
+        hit = _lookup_city(candidate, cities, fuzzy=False)
+        if hit:
+            country_in_line = next(
+                (header_country[s] for s in segments
+                 if s in header_country and header_country[s] != hit[1]),
+                None,
+            )
+            return hit[0], country_in_line or hit[1]
+
+    # Fuzzy fallback — only on segments shorter than ~30 chars to avoid
+    # matching whole sentences.
+    for candidate in [s for s in segments if 3 <= len(s) <= 30]:
+        hit = _lookup_city(candidate, cities, fuzzy=True)
+        if hit:
+            return hit
+    return None
 
 
 def extract_location(cv_text: str) -> Tuple[Optional[str], Optional[str]]:
-    """Return ``(city_display, country_code_or_label)`` or ``(None, None)``.
+    """Return ``(city_display, country_iso2)`` or ``(None, None)``.
 
-    Detection order:
-        1. An explicit ``Location: ...`` / ``Domisili: ...`` header.
-        2. Any known city name appearing anywhere in the CV.
+    Resolution order:
+        1. Explicit ``Location:`` / ``Domisili:`` header — exact then fuzzy
+           gazetteer lookup.
+        2. Whole-CV n-gram scan, ranked by population and biased toward
+           any country the CV explicitly names.
+        3. Country-only mention (e.g. ``Indonesia`` without a city).
 
-    Country is reported as ISO-2 when the city is in the gazetteer; for
-    free-text "City, Country" headers the country is returned verbatim.
+    Country code is always ISO-2 when known. Free-text headers that
+    reference an unknown city are returned verbatim with country=None
+    so downstream code can still display "what the CV said".
     """
     if not cv_text:
         return (None, None)
-    norm = _normalize(cv_text)
+    cities, country_names, country_codes = _gazetteer()
 
     # 1) Explicit header
     m = _LOC_HEADERS.search(cv_text)
     if m:
         line = m.group(1).strip()
-        line_norm = _normalize(line)
-        for city, iso in _CITY_LOOKUP.items():
-            if re.search(rf"\b{re.escape(city)}\b", line_norm):
-                return (city.title(), iso)
-        # Free-text "Jakarta, Indonesia" or "Jakarta, ID" — take both halves
+        resolved = _resolve_header_line(line, cities, country_names, country_codes)
+        if resolved:
+            return resolved
+        # Fallback to free-text "City, Country" so the UI still has
+        # something to display, even when neither side is in the gazetteer.
         if "," in line:
-            city, country = (p.strip() for p in line.split(",", 1))
-            if 2 <= len(city) <= 40:
-                return (city, country if country else None)
+            city_part, country_part = (p.strip() for p in line.split(",", 1))
+            if 2 <= len(city_part) <= 40:
+                country_part_norm = _normalize(country_part)
+                country_iso = (
+                    country_names.get(country_part_norm)
+                    or country_codes.get(country_part_norm)
+                )
+                return (city_part, country_iso or (country_part or None))
         if 2 <= len(line) <= 40:
             return (line, None)
 
-    # 2) Whole-CV scan: prefer Indonesian cities (they're the dominant cohort)
-    for city, iso in _ID_CITIES.items():
-        if re.search(rf"\b{re.escape(city)}\b", norm):
-            return (city.title(), iso)
-    for city, iso in _GLOBAL_CITIES.items():
-        if re.search(rf"\b{re.escape(city)}\b", norm):
-            return (city.title(), iso)
+    # 2) Whole-CV scan
+    scanned = _scan_for_city(cv_text, cities, country_names)
+    if scanned:
+        return scanned
+
+    # 3) Country-only mention — better than nothing for the matcher.
+    declared = _detect_country_isos(_normalize(cv_text), country_names)
+    if len(declared) == 1:
+        return (None, next(iter(declared)))
 
     return (None, None)
 
