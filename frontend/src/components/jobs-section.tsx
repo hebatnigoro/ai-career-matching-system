@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { CBtn } from "./cbtn";
 import { matchJobs, refreshJobs } from "@/lib/api";
-import type { JobMatchResult, JobScores, MatchJobsResponse } from "@/lib/types";
+import type { JobMatchResult, MatchJobsResponse } from "@/lib/types";
+
+type SortDir = "desc" | "asc";
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -40,54 +42,28 @@ const errBox: React.CSSProperties = {
   marginBottom: 12,
 };
 
-const SCORE_COLORS: Record<keyof JobScores, string> = {
-  semantic:   "#0EA5E9",
-  skill:      "#10B981",
-  experience: "#F59E0B",
-  location:   "#A855F7",
-  final:      "#1e1a3a",
-};
+function skillMatchCount(r: JobMatchResult): number {
+  return r.skill_match.matched.length;
+}
 
-const SCORE_LABELS: Record<keyof JobScores, string> = {
-  semantic:   "Semantic",
-  skill:      "Skills",
-  experience: "Experience",
-  location:   "Location",
-  final:      "Final",
-};
+function skillRatio(r: JobMatchResult): number {
+  // Use the backend's pre-computed ratio when available — it already
+  // guards against divide-by-zero for jobs with no inferred skills.
+  return typeof r.skill_match.match_ratio === "number"
+    ? r.skill_match.match_ratio
+    : 0;
+}
 
-function ScoreBar({ name, value, color }: { name: string; value: number; color: string }) {
-  const pct = Math.max(0, Math.min(1, value)) * 100;
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12 }}>
-      <div style={{ width: 78, fontWeight: 800, color: "var(--pd-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", fontSize: 10 }}>
-        {name}
-      </div>
-      <div
-        style={{
-          flex: 1,
-          height: 12,
-          background: "#F1F5F9",
-          borderRadius: 999,
-          border: "2px solid #1e1a3a",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <div
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            background: color,
-            transition: "width 0.4s",
-          }}
-        />
-      </div>
-      <div style={{ width: 38, textAlign: "right", fontWeight: 800, color: "#1e1a3a" }}>
-        {(value * 100).toFixed(0)}%
-      </div>
-    </div>
-  );
+function sortBySkill(results: JobMatchResult[], dir: SortDir): JobMatchResult[] {
+  // Stable sort by (ratio, absolute count). The absolute count is the
+  // tie-breaker so "8 / 12" outranks "1 / 1" when the user is looking
+  // for the strongest skill match, not the most lopsided ratio.
+  const sign = dir === "desc" ? -1 : 1;
+  return [...results].sort((a, b) => {
+    const dr = sign * (skillRatio(a) - skillRatio(b));
+    if (dr !== 0) return dr;
+    return sign * (skillMatchCount(a) - skillMatchCount(b));
+  });
 }
 
 function Pill({ children, color, bg }: { children: React.ReactNode; color: string; bg: string }) {
@@ -112,9 +88,13 @@ function Pill({ children, color, bg }: { children: React.ReactNode; color: strin
 }
 
 function JobCard({ result }: { result: JobMatchResult }) {
-  const [open, setOpen] = useState(false);
+  const [showMissing, setShowMissing] = useState(false);
   const j = result.job;
-  const s = result.scores;
+  const matched = result.skill_match.matched;
+  const missing = result.skill_match.missing;
+  const requiredCount = result.skill_match.required_skills.length;
+  const matchedCount = matched.length;
+
   return (
     <div
       style={{
@@ -130,7 +110,7 @@ function JobCard({ result }: { result: JobMatchResult }) {
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
             <span
               style={{
                 fontSize: 10,
@@ -147,6 +127,7 @@ function JobCard({ result }: { result: JobMatchResult }) {
             </span>
             {!result.eligible && (
               <span
+                title={(result.ineligible_reasons || []).join(" · ") || "Did not meet eligibility filters"}
                 style={{
                   fontSize: 10,
                   fontWeight: 800,
@@ -158,6 +139,22 @@ function JobCard({ result }: { result: JobMatchResult }) {
                 }}
               >
                 INELIGIBLE
+              </span>
+            )}
+            {result.low_signal && (
+              <span
+                title="Job posting has too little detail to score reliably"
+                style={{
+                  fontSize: 10,
+                  fontWeight: 800,
+                  color: "#8a5a00",
+                  background: "#fff3d6",
+                  padding: "2px 8px",
+                  borderRadius: 6,
+                  border: "1.5px solid #d4a020",
+                }}
+              >
+                LOW SIGNAL
               </span>
             )}
           </div>
@@ -175,7 +172,7 @@ function JobCard({ result }: { result: JobMatchResult }) {
         </div>
         <div
           style={{
-            background: "#0EA5E9",
+            background: "#10B981",
             color: "#fff",
             border: "2.5px solid #1e1a3a",
             borderRadius: 14,
@@ -183,40 +180,67 @@ function JobCard({ result }: { result: JobMatchResult }) {
             fontWeight: 900,
             fontSize: 22,
             boxShadow: "3px 3px 0 #1e1a3a",
-            minWidth: 76,
+            minWidth: 96,
             textAlign: "center",
+            lineHeight: 1.1,
           }}
         >
-          {(s.final * 100).toFixed(0)}
-          <span style={{ fontSize: 12, fontWeight: 800 }}>%</span>
+          {matchedCount}
+          <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.85 }}>
+            {" / "}{requiredCount || "?"}
+          </span>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.06em", marginTop: 2 }}>
+            SKILLS
+          </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 14 }}>
-        <ScoreBar name={SCORE_LABELS.semantic}   value={s.semantic}   color={SCORE_COLORS.semantic} />
-        <ScoreBar name={SCORE_LABELS.skill}      value={s.skill}      color={SCORE_COLORS.skill} />
-        <ScoreBar name={SCORE_LABELS.experience} value={s.experience} color={SCORE_COLORS.experience} />
-        <ScoreBar name={SCORE_LABELS.location}   value={s.location}   color={SCORE_COLORS.location} />
+      <div style={{ marginTop: 14 }}>
+        <div style={{ ...labelStyle, marginBottom: 6 }}>
+          Your matching skills ({matchedCount}
+          {requiredCount ? `/${requiredCount}` : ""})
+        </div>
+        {matchedCount === 0 ? (
+          <div style={{ fontSize: 12, color: "var(--pd-text-muted)", fontStyle: "italic" }}>
+            No required skills detected in your CV for this role.
+          </div>
+        ) : (
+          <div>
+            {matched.map((m) => (
+              <Pill key={m.skill} color="#1e1a3a" bg="#D8F5E5">
+                {m.skill}
+              </Pill>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 14, flexWrap: "wrap" }}>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          style={{
-            padding: "6px 12px",
-            border: "2px solid #1e1a3a",
-            borderRadius: 10,
-            background: "var(--pd-card)",
-            fontSize: 12,
-            fontWeight: 800,
-            color: "var(--pd-text)",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            boxShadow: "2px 2px 0 #1e1a3a",
-          }}
-        >
-          {open ? "▲ Hide breakdown" : "▼ Why this match?"}
-        </button>
+        {missing.length > 0 ? (
+          <button
+            onClick={() => setShowMissing((v) => !v)}
+            style={{
+              padding: "6px 12px",
+              border: "2px solid #1e1a3a",
+              borderRadius: 10,
+              background: "var(--pd-card)",
+              fontSize: 12,
+              fontWeight: 800,
+              color: "var(--pd-text)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              boxShadow: "2px 2px 0 #1e1a3a",
+            }}
+          >
+            {showMissing
+              ? `▲ Hide missing (${missing.length})`
+              : `▼ Show missing skills (${missing.length})`}
+          </button>
+        ) : (
+          <span style={{ fontSize: 12, color: "var(--pd-text-muted)" }}>
+            No missing required skills.
+          </span>
+        )}
         {j.url && (
           <a
             href={j.url}
@@ -239,40 +263,12 @@ function JobCard({ result }: { result: JobMatchResult }) {
         )}
       </div>
 
-      {open && (
-        <div style={{ marginTop: 16, padding: "14px 16px", background: "var(--pd-bg-soft)", borderRadius: 12, border: "2px dashed #94A3B8" }}>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ ...labelStyle, marginBottom: 6 }}>Matched skills ({result.skill_match.matched.length}/{result.skill_match.required_skills.length})</div>
-            {result.skill_match.matched.length === 0 && (
-              <div style={{ fontSize: 12, color: "var(--pd-text-muted)" }}>No required skills matched.</div>
-            )}
-            {result.skill_match.matched.map((m) => (
-              <Pill key={m.skill} color="#1e1a3a" bg="#D8F5E5">
-                {m.skill} <span style={{ opacity: 0.6, fontWeight: 700 }}>({m.source})</span>
-              </Pill>
-            ))}
-          </div>
-
-          {result.skill_match.missing.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ ...labelStyle, marginBottom: 6 }}>Missing skills ({result.skill_match.missing.length})</div>
-              {result.skill_match.missing.slice(0, 12).map((s) => (
-                <Pill key={s} color="#a02020" bg="#ffe4e4">{s}</Pill>
-              ))}
-            </div>
-          )}
-
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, fontSize: 12, color: "var(--pd-text-muted)" }}>
-            <div>
-              <strong>Experience:</strong> {result.experience_match.reason}
-              {result.experience_match.cv !== undefined && result.experience_match.required && (
-                <> · CV {result.experience_match.cv}y vs required {result.experience_match.required[0]}–{result.experience_match.required[1]}y</>
-              )}
-            </div>
-            <div>
-              <strong>Location:</strong> {result.location_match.reason}
-            </div>
-          </div>
+      {showMissing && missing.length > 0 && (
+        <div style={{ marginTop: 12, padding: "10px 12px", background: "var(--pd-bg-soft)", borderRadius: 10, border: "2px dashed #94A3B8" }}>
+          <div style={{ ...labelStyle, marginBottom: 6 }}>Missing skills</div>
+          {missing.map((s) => (
+            <Pill key={s} color="#a02020" bg="#ffe4e4">{s}</Pill>
+          ))}
         </div>
       )}
     </div>
@@ -345,6 +341,8 @@ export function JobsSection() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  // Default to descending — most users want the best skill match on top.
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   async function handleSubmit() {
     if (!file) {
@@ -418,7 +416,7 @@ export function JobsSection() {
             Find Jobs That Fit Your CV
           </h2>
           <p style={{ fontSize: 14, color: "var(--pd-text-muted)" }}>
-            Real postings from Greenhouse, Lever &amp; Ashby. Ranked by skill, experience, and location fit.
+            Real postings from Greenhouse, Lever &amp; Ashby. Ranked by how many required skills your CV already has.
           </p>
         </div>
 
@@ -517,7 +515,43 @@ export function JobsSection() {
                 No jobs match the current filters. Try loosening them or refresh the cache.
               </div>
             ) : (
-              result.ranked.map((r) => <JobCard key={r.job.id} result={r} />)
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    marginBottom: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "var(--pd-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                    Sorted by skills matched
+                  </div>
+                  <button
+                    onClick={() => setSortDir((d) => (d === "desc" ? "asc" : "desc"))}
+                    title={sortDir === "desc" ? "Showing best match first" : "Showing worst match first"}
+                    style={{
+                      padding: "6px 12px",
+                      border: "2px solid #1e1a3a",
+                      borderRadius: 10,
+                      background: "var(--pd-card)",
+                      fontSize: 12,
+                      fontWeight: 800,
+                      color: "var(--pd-text)",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      boxShadow: "2px 2px 0 #1e1a3a",
+                    }}
+                  >
+                    {sortDir === "desc" ? "↓ Most skills first" : "↑ Fewest skills first"}
+                  </button>
+                </div>
+                {sortBySkill(result.ranked, sortDir).map((r) => (
+                  <JobCard key={r.job.id} result={r} />
+                ))}
+              </>
             )}
           </div>
         )}

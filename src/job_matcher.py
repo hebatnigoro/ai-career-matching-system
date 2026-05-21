@@ -38,7 +38,7 @@ from src.skill_extract import (
 from src.cv_profile import (
     CVProfile,
     extract_cv_profile,
-    required_experience_from_jd,
+    infer_required_experience,
     profile_to_dict,
 )
 
@@ -54,9 +54,27 @@ DEFAULT_WEIGHTS = {
     "location": 0.15,
 }
 
-DEFAULT_EXP_SIGMA = 2.0   # years; tolerance band for experience fit
+# σ is intentionally tight on the under-qualified side: a 1-yr CV against
+# a 5-yr senior role used to score ~0.13 with σ=2.0 and still slip through
+# the matcher because experience wasn't part of the eligibility filter.
+# With σ=1.5 the same gap collapses to ~0.03, and the new exp_threshold
+# (below) keeps such mismatches out of the eligible bucket entirely.
+DEFAULT_EXP_SIGMA = 1.5
 DEFAULT_SKILL_THRESHOLD = 0.30   # eligibility floor on skill match
 DEFAULT_LOC_THRESHOLD = 0.20     # eligibility floor on location fit
+DEFAULT_EXP_THRESHOLD = 0.35     # eligibility floor on experience fit
+                                 # (only applied when the JD actually
+                                 # specifies a required range — unspecified
+                                 # JDs are not penalized by this filter)
+
+# A JD is treated as "low signal" — useful for the UI to flag, and an
+# automatic eligibility downgrade — when its enrichment payload is
+# anemic. Demo / placeholder postings in the cache typically have empty
+# descriptions and no extractable skills; they used to ride high on the
+# unspecified-experience default of 1.0 and pollute the top of the
+# ranking.
+LOW_SIGNAL_MIN_SKILLS = 3
+LOW_SIGNAL_MIN_DESC_CHARS = 200
 
 # Coarse-to-fine cap: keep this many candidates after the cheap embedding
 # pass before running per-job skill / experience / location scoring. The
@@ -141,11 +159,15 @@ def enrich_jobs_with_skills(
 
     for idx, j in enumerate(jobs):
         desc = j.get("description") or ""
+        title = j.get("title") or ""
         inferred = infer_job_required_skills(desc, registry, model, semantic_threshold)
-        req_range = required_experience_from_jd(desc)
+        req_range, req_source = infer_required_experience(title, desc)
         out = dict(j)
         out["inferred_skills"] = inferred
         out["required_experience"] = list(req_range) if req_range else None
+        # Persist HOW we derived the range so the UI can say
+        # "Senior role (from title)" vs "5+ years (from JD text)".
+        out["required_experience_source"] = req_source
         out["embedding"] = job_embs[idx].tolist()
         enriched.append(out)
     return enriched
@@ -219,14 +241,22 @@ def score_experience(
         return {"score": 1.0, "reason": "in_range", "cv": cv_years, "required": [lo, hi]}
     if cv_years > hi:
         gap = cv_years - hi
-        # Overqualified: gentler decay
+        # Overqualified: gentler decay — being too senior for a role is
+        # rarely a dealbreaker, just a signal.
         score = math.exp(-(gap ** 2) / (2 * (sigma * 1.5) ** 2))
         return {
             "score": round(score, 4), "reason": "overqualified",
             "cv": cv_years, "required": [lo, hi], "gap": round(gap, 1),
         }
     gap = lo - cv_years
+    # Under-qualified: tight σ + a hard ceiling once the gap exceeds 1
+    # year. The cap exists because the Gaussian alone, while small,
+    # still leaves room for a junior CV to be presented as a passing
+    # match when the other three components are perfect. Treat any gap
+    # ≥1y as a categorical "under-qualified" signal — never above 0.5.
     score = math.exp(-(gap ** 2) / (2 * sigma ** 2))
+    if gap >= 1.0:
+        score = min(score, 0.5 / (1.0 + gap))
     return {
         "score": round(score, 4), "reason": "underqualified",
         "cv": cv_years, "required": [lo, hi], "gap": round(gap, 1),
@@ -299,6 +329,7 @@ def match_jobs_for_cv(
     weights: Optional[Dict[str, float]] = None,
     skill_threshold: float = DEFAULT_SKILL_THRESHOLD,
     loc_threshold: float = DEFAULT_LOC_THRESHOLD,
+    exp_threshold: float = DEFAULT_EXP_THRESHOLD,
     topk: int = 20,
     filters: Optional[Dict] = None,
     coarse_cap: int = DEFAULT_COARSE_CAP,
@@ -400,7 +431,19 @@ def match_jobs_for_cv(
     # 3) Per-job scoring
     scored: List[Dict] = []
     for idx, j in enumerate(candidates):
+        # Two semantic numbers, on purpose:
+        #   * ``semantic_raw`` is the absolute cosine — meaningful on its
+        #     own ("60% similar to your CV") and what we feed into the
+        #     final weighted composite.
+        #   * ``semantic`` is the min-max-normalized version, kept around
+        #     so the UI can rank within the current batch without giving
+        #     the user the misleading impression that a 90% normalized
+        #     score means a 90% absolute match.
+        s_sem_raw = float(sim_row[idx])
         s_sem = float(norm_row[idx])
+
+        desc_text = j.get("description", "") or ""
+        title_text = j.get("title", "") or ""
 
         # Skill score — prefer the cached `inferred_skills` produced by
         # ``enrich_jobs_with_skills`` at refresh time. Fall back to a
@@ -420,19 +463,26 @@ def match_jobs_for_cv(
             # high precision. Refresh-time enrichment uses the full
             # 3-layer pipeline for max recall.
             required = infer_job_required_skills(
-                j.get("description", ""), registry, model,
+                desc_text, registry, model,
                 enable_semantic=False,
                 enable_fuzzy=False,
             )
         sk = score_skill_match(cv_skills, required)
 
-        # Experience — prefer cached parse from refresh time
+        # Experience — prefer cached parse from refresh time. The
+        # ``required_experience_source`` cache field tells us whether the
+        # range came from the JD body or the title heuristic; if absent
+        # (older cache), fall back to inferring live.
         cached_range = j.get("required_experience")
+        req_source = j.get("required_experience_source")
         if isinstance(cached_range, list) and len(cached_range) == 2:
             req_range = (float(cached_range[0]), float(cached_range[1]))
+            if not req_source:
+                req_source = "cached"
         else:
-            req_range = required_experience_from_jd(j.get("description", ""))
+            req_range, req_source = infer_required_experience(title_text, desc_text)
         exp = score_experience(profile.experience_years, req_range)
+        exp["required_source"] = req_source
 
         # Location
         loc = score_location(
@@ -442,25 +492,63 @@ def match_jobs_for_cv(
             j,
         )
 
-        composite = (
-            weights["semantic"] * s_sem
-            + weights["skill"] * sk["score"]
-            + weights["experience"] * exp["score"]
-            + weights["location"] * loc["score"]
+        # Low-signal flag — anemic JDs (no extracted skills, near-empty
+        # description) shouldn't claim the top of the ranking just
+        # because experience/location defaulted high. Surface the flag
+        # so the UI can show a warning, and exclude from eligibility.
+        low_signal = (
+            len(required) < LOW_SIGNAL_MIN_SKILLS
+            and len(desc_text) < LOW_SIGNAL_MIN_DESC_CHARS
         )
 
-        eligible = (sk["score"] >= skill_threshold) and (loc["score"] >= loc_threshold)
+        # Final composite uses the *raw* semantic so the number stays
+        # interpretable when the batch is small or noisy (min-max
+        # normalization with a single-candidate batch returns 0.0,
+        # which used to wreck the final score for solo matches).
+        contributions = {
+            "semantic":   weights["semantic"]   * s_sem_raw,
+            "skill":      weights["skill"]      * sk["score"],
+            "experience": weights["experience"] * exp["score"],
+            "location":   weights["location"]   * loc["score"],
+        }
+        composite = sum(contributions.values())
+
+        # Eligibility — experience joins skill + location as a hard
+        # filter, but only when the JD actually told us what it wants.
+        # An unspecified JD still defaults to 1.0 and passes; that's
+        # intentional — we shouldn't penalize companies that omit a
+        # years requirement from the body of a generic-title role.
+        exp_blocks_eligibility = (
+            req_range is not None and exp["score"] < exp_threshold
+        )
+        eligible = (
+            sk["score"] >= skill_threshold
+            and loc["score"] >= loc_threshold
+            and not exp_blocks_eligibility
+            and not low_signal
+        )
 
         scored.append({
             "job": _slim_job(j),
             "scores": {
-                "semantic":   round(s_sem, 4),
-                "skill":      round(sk["score"], 4),
-                "experience": round(exp["score"], 4),
-                "location":   round(loc["score"], 4),
-                "final":      round(composite, 4),
+                "semantic":     round(s_sem, 4),       # batch-normalized (display)
+                "semantic_raw": round(s_sem_raw, 4),   # absolute cosine (composite)
+                "skill":        round(sk["score"], 4),
+                "experience":   round(exp["score"], 4),
+                "location":     round(loc["score"], 4),
+                "final":        round(composite, 4),
             },
+            # Pre-computed weighted contributions so the UI doesn't have
+            # to know the weights to render the breakdown table.
+            "contributions": {k: round(v, 4) for k, v in contributions.items()},
             "eligible": eligible,
+            "ineligible_reasons": _ineligibility_reasons(
+                sk["score"], skill_threshold,
+                loc["score"], loc_threshold,
+                exp["score"], exp_threshold, req_range,
+                low_signal,
+            ),
+            "low_signal": low_signal,
             "skill_match": {
                 "matched": sk["matched"],
                 "missing": sk["missing"],
@@ -503,3 +591,35 @@ def _slim_job(j: Dict) -> Dict:
         "url", "apply_url", "posted_at", "compensation",
     )
     return {k: j.get(k) for k in keys}
+
+
+def _ineligibility_reasons(
+    skill_score: float, skill_thr: float,
+    loc_score: float, loc_thr: float,
+    exp_score: float, exp_thr: float,
+    req_range: Optional[Tuple[float, float]],
+    low_signal: bool,
+) -> List[str]:
+    """Human-readable list of why a job didn't make the eligible bucket.
+
+    Plain strings, in the same order the UI shows the component bars,
+    so the breakdown table can highlight the failing rows without
+    duplicating the threshold logic on the frontend.
+    """
+    reasons: List[str] = []
+    if skill_score < skill_thr:
+        reasons.append(
+            f"Skill match {skill_score:.0%} below minimum {skill_thr:.0%}"
+        )
+    if loc_score < loc_thr:
+        reasons.append(
+            f"Location fit {loc_score:.0%} below minimum {loc_thr:.0%}"
+        )
+    if req_range is not None and exp_score < exp_thr:
+        reasons.append(
+            f"Experience fit {exp_score:.0%} below minimum {exp_thr:.0%} "
+            f"(role expects {req_range[0]:.0f}–{req_range[1]:.0f}y)"
+        )
+    if low_signal:
+        reasons.append("Job posting has too little detail to score reliably")
+    return reasons

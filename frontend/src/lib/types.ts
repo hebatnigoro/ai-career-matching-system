@@ -85,11 +85,19 @@ export type JobSummary = {
 };
 
 export type JobScores = {
-  semantic: number;
+  semantic: number;       // batch-normalized (display rank only)
+  semantic_raw: number;   // absolute cosine — what the final composite uses
   skill: number;
   experience: number;
   location: number;
   final: number;
+};
+
+export type ScoreContributions = {
+  semantic: number;
+  skill: number;
+  experience: number;
+  location: number;
 };
 
 export type SkillMatchEntry = {
@@ -102,7 +110,10 @@ export type SkillMatchEntry = {
 export type JobMatchResult = {
   job: JobSummary;
   scores: JobScores;
+  contributions: ScoreContributions;
   eligible: boolean;
+  ineligible_reasons: string[];
+  low_signal: boolean;
   skill_match: {
     matched: SkillMatchEntry[];
     missing: string[];
@@ -115,6 +126,7 @@ export type JobMatchResult = {
     cv?: number;
     required?: [number, number];
     gap?: number;
+    required_source?: string;
   };
   location_match: {
     score: number;

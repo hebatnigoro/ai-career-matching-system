@@ -657,6 +657,55 @@ _JD_EXP_PATTERNS = [
     re.compile(r"(\d{1,2})\s*(?:years?|yrs?)\s+of\s+(?:relevant\s+|professional\s+)?experience", re.IGNORECASE),
 ]
 
+# Seniority cues lifted from the job title. Order matters — the first
+# matching tier wins, so the most senior signals are listed first to
+# stop "Senior Manager" being mis-classified as mid by an earlier
+# "manager" hit.
+_TITLE_SENIORITY_TIERS: List[Tuple[re.Pattern, Tuple[float, float], str]] = [
+    (re.compile(
+        r"\b(chief|vp|vice\s+president|head\s+of|director|principal|staff|"
+        r"distinguished|fellow)\b", re.IGNORECASE),
+     (8.0, 12.0), "executive"),
+    (re.compile(
+        r"\b(senior|sr\.?|lead|architect|expert|specialist\s+iii|iii|"
+        r"manager|mgr\.?)\b", re.IGNORECASE),
+     (5.0, 10.0), "senior"),
+    (re.compile(
+        r"\b(mid[\s\-]?level|mid[\s\-]?senior|intermediate|ii|level\s+2|l2)\b",
+        re.IGNORECASE),
+     (2.0, 5.0), "mid"),
+    (re.compile(
+        r"\b(junior|jr\.?|entry[\s\-]?level|early[\s\-]?career|graduate|grad|"
+        r"associate|trainee|apprentice|i|level\s+1|l1)\b", re.IGNORECASE),
+     (0.0, 2.0), "junior"),
+    (re.compile(
+        r"\b(intern(ship)?|magang|co[\s\-]?op|working\s+student)\b",
+        re.IGNORECASE),
+     (0.0, 1.0), "intern"),
+]
+
+
+def seniority_from_title(title: str) -> Optional[Tuple[Tuple[float, float], str]]:
+    """Map a job title to an expected experience range and a tier label.
+
+    Pure title-based heuristic — independent of the JD body. Used as a
+    fallback when the description doesn't spell out ``X years of
+    experience``. Real-world job postings frequently encode seniority
+    only in the title (``Senior Software Engineer``, ``Lead Designer``,
+    ``Graduate Analyst``), so ignoring the title made it possible for a
+    1-year CV to score 100% on a senior listing — the original bug.
+
+    Returns ``((min_years, max_years), tier)`` or ``None`` when no cue
+    matches (a generic title like ``Software Engineer`` is intentionally
+    left unconstrained so the JD body or default behavior takes over).
+    """
+    if not title:
+        return None
+    for pat, rng, tier in _TITLE_SENIORITY_TIERS:
+        if pat.search(title):
+            return (rng, tier)
+    return None
+
 
 def required_experience_from_jd(description: str) -> Optional[Tuple[float, float]]:
     """Return ``(min_years, max_years)`` required by the JD, or ``None``.
@@ -683,3 +732,23 @@ def required_experience_from_jd(description: str) -> Optional[Tuple[float, float
             n = nums[0]
             return (n, n + 3)
     return None
+
+
+def infer_required_experience(
+    title: str, description: str,
+) -> Tuple[Optional[Tuple[float, float]], str]:
+    """Combine JD-body parsing and title heuristics.
+
+    Resolution order:
+        1. Explicit ``X years`` phrase in the description (highest trust).
+        2. Seniority tier inferred from the title (covers JDs that don't
+           spell out years but say "Senior" / "Junior" / "Lead").
+        3. ``(None, "unspecified")`` — caller decides the default.
+    """
+    rng = required_experience_from_jd(description)
+    if rng is not None:
+        return rng, "jd_text"
+    title_hit = seniority_from_title(title)
+    if title_hit is not None:
+        return title_hit[0], f"title:{title_hit[1]}"
+    return None, "unspecified"

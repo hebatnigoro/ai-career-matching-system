@@ -23,6 +23,7 @@ from src.job_matcher import (
     DEFAULT_WEIGHTS,
     DEFAULT_SKILL_THRESHOLD,
     DEFAULT_LOC_THRESHOLD,
+    DEFAULT_EXP_THRESHOLD,
 )
 
 
@@ -709,6 +710,7 @@ class MatchJobsRequest(BaseModel):
     filters: JobFilters = JobFilters()
     skill_threshold: float = DEFAULT_SKILL_THRESHOLD
     loc_threshold: float = DEFAULT_LOC_THRESHOLD
+    exp_threshold: float = DEFAULT_EXP_THRESHOLD
     topk: int = 20
     model: Optional[str] = 'intfloat/multilingual-e5-base'
 
@@ -894,6 +896,7 @@ def match_jobs(req: MatchJobsRequest):
         weights=req.weights.model_dump(),
         skill_threshold=req.skill_threshold,
         loc_threshold=req.loc_threshold,
+        exp_threshold=req.exp_threshold,
         topk=req.topk,
         filters=req.filters.model_dump(exclude_none=True),
     )
@@ -915,6 +918,7 @@ async def match_jobs_file(
     w_location: float = Form(DEFAULT_WEIGHTS["location"]),
     skill_threshold: float = Form(DEFAULT_SKILL_THRESHOLD),
     loc_threshold: float = Form(DEFAULT_LOC_THRESHOLD),
+    exp_threshold: float = Form(DEFAULT_EXP_THRESHOLD),
     topk: int = Form(20),
     model: Optional[str] = Form('intfloat/multilingual-e5-base'),
 ):
@@ -949,6 +953,7 @@ async def match_jobs_file(
         ),
         skill_threshold=skill_threshold,
         loc_threshold=loc_threshold,
+        exp_threshold=exp_threshold,
         topk=topk,
         model=model,
     )
