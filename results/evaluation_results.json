@@ -1,0 +1,2422 @@
+{
+  "model": "intfloat/multilingual-e5-base",
+  "thresholds": {
+    "tau_high": 0.7,
+    "tau_mid": 0.4,
+    "delta_minor": 0.1,
+    "skill_threshold": 0.6,
+    "min_similarity": 0.55
+  },
+  "count_students": 15,
+  "count_careers": 18,
+  "drift_distribution": {
+    "Minor Drift": 5,
+    "Aligned": 5,
+    "Strong Fit (No Declared Interest)": 3,
+    "Major Drift": 2
+  },
+  "similarity_stats": {
+    "raw_cosine": {
+      "mean": 0.7886,
+      "std": 0.0256,
+      "min": 0.7054,
+      "max": 0.8773,
+      "range": 0.1719
+    },
+    "relative_score": {
+      "mean": 0.393,
+      "std": 0.2735,
+      "median": 0.3453
+    }
+  },
+  "inter_career_similarity": {
+    "mean": 0.8318,
+    "std": 0.0295,
+    "min": 0.772,
+    "max": 0.9401,
+    "most_similar_pairs": [
+      {
+        "a": "Data Analyst",
+        "b": "Business Intelligence Analyst",
+        "similarity": 0.9401
+      },
+      {
+        "a": "Accountant",
+        "b": "Financial Analyst",
+        "similarity": 0.9236
+      },
+      {
+        "a": "Product Manager",
+        "b": "Project Manager",
+        "similarity": 0.9205
+      },
+      {
+        "a": "Backend Engineer",
+        "b": "Frontend Engineer",
+        "similarity": 0.9187
+      },
+      {
+        "a": "Data Analyst",
+        "b": "Financial Analyst",
+        "similarity": 0.9132
+      }
+    ]
+  },
+  "expected_vs_actual": {
+    "agreement_rate": 60.0,
+    "matches": 9,
+    "total": 15
+  },
+  "results": [
+    {
+      "student_id": "stu-001",
+      "name": "Andi",
+      "declared_interest": "data-scientist",
+      "declared_relative_score": 0.737,
+      "best_alt_id": "backend-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.263,
+      "status": "Minor Drift",
+      "rationale": "Minat yang dideklarasikan cukup sesuai (relative_score=0.737 >= 0.4), namun alternatif 'backend-engineer' lebih cocok (norm_adv=0.263 > 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Python",
+            "similarity": 0.98,
+            "source": "lexical",
+            "evidence": "Python",
+            "context": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python, Flask). Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan",
+            "section": "experience",
+            "cv_span": [
+              74,
+              80
+            ]
+          },
+          {
+            "skill": "Data Modeling",
+            "similarity": 0.5182,
+            "source": "semantic",
+            "evidence": "Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan bisnis.",
+            "context": "Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan bisnis.",
+            "section": "experience",
+            "cv_span": [
+              90,
+              168
+            ]
+          },
+          {
+            "skill": "Machine Learning",
+            "similarity": 0.5113,
+            "source": "semantic",
+            "evidence": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python",
+            "context": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python, Flask).",
+            "section": "other",
+            "cv_span": [
+              0,
+              89
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Feature Engineering",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "NumPy",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Pandas",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Statistics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TensorFlow",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "scikit-learn",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.3333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Python",
+            "source": "lexical",
+            "confidence": 0.98,
+            "matched_text": "Python",
+            "cv_span": [
+              74,
+              80
+            ],
+            "context": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python, Flask). Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan",
+            "section": "experience"
+          },
+          {
+            "canonical": "Data Modeling",
+            "source": "semantic",
+            "confidence": 0.5182,
+            "matched_text": "Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan bisnis.",
+            "cv_span": [
+              90,
+              168
+            ],
+            "context": "Pernah mengerjakan ETL sederhana dan analisis data dasar untuk laporan bisnis.",
+            "section": "experience"
+          },
+          {
+            "canonical": "Machine Learning",
+            "source": "semantic",
+            "confidence": 0.5113,
+            "matched_text": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python",
+            "cv_span": [
+              0,
+              89
+            ],
+            "context": "Mahasiswa Informatika dengan pengalaman magang sebagai backend developer (Python, Flask).",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.866
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.8255
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.7369
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.734
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.866
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.8255
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.7369
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.734
+        }
+      ]
+    },
+    {
+      "student_id": "stu-002",
+      "name": "Bunga",
+      "declared_interest": "ui-ux-designer",
+      "declared_relative_score": 1.0,
+      "best_alt_id": "frontend-engineer",
+      "best_alt_relative_score": 0.5609,
+      "relative_advantage": -0.4391,
+      "status": "Aligned",
+      "rationale": "Minat yang dideklarasikan sangat sesuai (relative_score=1.000 >= 0.7). Tidak ada alternatif dengan keunggulan signifikan (norm_adv=-0.439 <= 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Figma",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "Figma",
+            "context": "Background Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other",
+            "cv_span": [
+              47,
+              52
+            ]
+          },
+          {
+            "skill": "Prototyping",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "prototyping",
+            "context": "Background Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other",
+            "cv_span": [
+              54,
+              65
+            ]
+          },
+          {
+            "skill": "User Research",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "user research",
+            "context": "ackground Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other",
+            "cv_span": [
+              81,
+              94
+            ]
+          },
+          {
+            "skill": "Design System",
+            "similarity": 0.5225,
+            "source": "semantic",
+            "evidence": "Background Desain Komunikasi Visual.",
+            "context": "Background Desain Komunikasi Visual.",
+            "section": "other",
+            "cv_span": [
+              0,
+              36
+            ]
+          },
+          {
+            "skill": "Usability Testing",
+            "similarity": 0.5173,
+            "source": "semantic",
+            "evidence": "Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "context": "Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other",
+            "cv_span": [
+              37,
+              117
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Wireframing",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.8333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Figma",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "Figma",
+            "cv_span": [
+              47,
+              52
+            ],
+            "context": "Background Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other"
+          },
+          {
+            "canonical": "Prototyping",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "prototyping",
+            "cv_span": [
+              54,
+              65
+            ],
+            "context": "Background Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other"
+          },
+          {
+            "canonical": "User Research",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "user research",
+            "cv_span": [
+              81,
+              94
+            ],
+            "context": "ackground Desain Komunikasi Visual. Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other"
+          },
+          {
+            "canonical": "Design System",
+            "source": "semantic",
+            "confidence": 0.5225,
+            "matched_text": "Background Desain Komunikasi Visual.",
+            "cv_span": [
+              0,
+              36
+            ],
+            "context": "Background Desain Komunikasi Visual.",
+            "section": "other"
+          },
+          {
+            "canonical": "Usability Testing",
+            "source": "semantic",
+            "confidence": 0.5173,
+            "matched_text": "Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "cv_span": [
+              37,
+              117
+            ],
+            "context": "Menguasai Figma, prototyping, dan melakukan user research untuk aplikasi mobile.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 1.0
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.5609
+        },
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 0.5567
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.5233
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4205
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 1.0
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.5609
+        },
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 0.5567
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.5233
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4205
+        }
+      ]
+    },
+    {
+      "student_id": "stu-003",
+      "name": "Chan",
+      "declared_interest": "software-engineer",
+      "declared_relative_score": 1.0,
+      "best_alt_id": "backend-engineer",
+      "best_alt_relative_score": 0.981,
+      "relative_advantage": -0.019,
+      "status": "Aligned",
+      "rationale": "Minat yang dideklarasikan sangat sesuai (relative_score=1.000 >= 0.7). Tidak ada alternatif dengan keunggulan signifikan (norm_adv=-0.019 <= 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Algorithms",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "algorithms",
+            "context": "Computer science student focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other",
+            "cv_span": [
+              37,
+              47
+            ]
+          },
+          {
+            "skill": "Microservices",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "microservices",
+            "context": "Computer science student focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other",
+            "cv_span": [
+              79,
+              92
+            ]
+          },
+          {
+            "skill": "Java",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "Java",
+            "context": "tudent focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other",
+            "cv_span": [
+              98,
+              102
+            ]
+          },
+          {
+            "skill": "Docker",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "Docker",
+            "context": "cusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other",
+            "cv_span": [
+              107,
+              113
+            ]
+          },
+          {
+            "skill": "Data Structures",
+            "similarity": 0.5364,
+            "source": "semantic",
+            "evidence": "Computer science student focusing on algorithms and distributed systems.",
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other",
+            "cv_span": [
+              0,
+              72
+            ]
+          },
+          {
+            "skill": "System Design",
+            "similarity": 0.5256,
+            "source": "semantic",
+            "evidence": "Computer science student focusing on algorithms and distributed systems.",
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other",
+            "cv_span": [
+              0,
+              72
+            ]
+          },
+          {
+            "skill": "Debugging",
+            "similarity": 0.5164,
+            "source": "semantic",
+            "evidence": "Computer science student focusing on algorithms and distributed systems.",
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other",
+            "cv_span": [
+              0,
+              72
+            ]
+          },
+          {
+            "skill": "Python",
+            "similarity": 0.5056,
+            "source": "semantic",
+            "evidence": "Computer science student focusing on algorithms and distributed systems.",
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other",
+            "cv_span": [
+              0,
+              72
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "CI/CD",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Cloud Basics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Git",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OOP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "REST API",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TypeScript",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Unit Testing",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.5333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Algorithms",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "algorithms",
+            "cv_span": [
+              37,
+              47
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other"
+          },
+          {
+            "canonical": "Microservices",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "microservices",
+            "cv_span": [
+              79,
+              92
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other"
+          },
+          {
+            "canonical": "Java",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "Java",
+            "cv_span": [
+              98,
+              102
+            ],
+            "context": "tudent focusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other"
+          },
+          {
+            "canonical": "Docker",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "Docker",
+            "cv_span": [
+              107,
+              113
+            ],
+            "context": "cusing on algorithms and distributed systems. Built microservices with Java and Docker.",
+            "section": "other"
+          },
+          {
+            "canonical": "Data Structures",
+            "source": "semantic",
+            "confidence": 0.5364,
+            "matched_text": "Computer science student focusing on algorithms and distributed systems.",
+            "cv_span": [
+              0,
+              72
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other"
+          },
+          {
+            "canonical": "System Design",
+            "source": "semantic",
+            "confidence": 0.5256,
+            "matched_text": "Computer science student focusing on algorithms and distributed systems.",
+            "cv_span": [
+              0,
+              72
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other"
+          },
+          {
+            "canonical": "Debugging",
+            "source": "semantic",
+            "confidence": 0.5164,
+            "matched_text": "Computer science student focusing on algorithms and distributed systems.",
+            "cv_span": [
+              0,
+              72
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other"
+          },
+          {
+            "canonical": "Python",
+            "source": "semantic",
+            "confidence": 0.5056,
+            "matched_text": "Computer science student focusing on algorithms and distributed systems.",
+            "cv_span": [
+              0,
+              72
+            ],
+            "context": "Computer science student focusing on algorithms and distributed systems.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.981
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.9457
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.891
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.7011
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.981
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.9457
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.891
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.7011
+        }
+      ]
+    },
+    {
+      "student_id": "stu-004",
+      "name": "Dewi",
+      "declared_interest": "digital-marketer",
+      "declared_relative_score": 1.0,
+      "best_alt_id": "project-manager",
+      "best_alt_relative_score": 0.5208,
+      "relative_advantage": -0.4792,
+      "status": "Aligned",
+      "rationale": "Minat yang dideklarasikan sangat sesuai (relative_score=1.000 >= 0.7). Tidak ada alternatif dengan keunggulan signifikan (norm_adv=-0.479 <= 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Social Media",
+            "similarity": 0.5503,
+            "source": "semantic",
+            "evidence": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosi",
+            "context": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosial dan membuat konten pemasaran digital.",
+            "section": "other",
+            "cv_span": [
+              0,
+              120
+            ]
+          },
+          {
+            "skill": "Content Marketing",
+            "similarity": 0.5211,
+            "source": "semantic",
+            "evidence": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosi",
+            "context": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosial dan membuat konten pemasaran digital.",
+            "section": "other",
+            "cv_span": [
+              0,
+              120
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Analytics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Copywriting",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Google Ads",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "SEO",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.3333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Social Media",
+            "source": "semantic",
+            "confidence": 0.5503,
+            "matched_text": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosi",
+            "cv_span": [
+              0,
+              120
+            ],
+            "context": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosial dan membuat konten pemasaran digital.",
+            "section": "other"
+          },
+          {
+            "canonical": "Content Marketing",
+            "source": "semantic",
+            "confidence": 0.5211,
+            "matched_text": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosi",
+            "cv_span": [
+              0,
+              120
+            ],
+            "context": "Latar belakang sistem informasi, aktif di organisasi kampus mengelola media sosial dan membuat konten pemasaran digital.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 1.0
+        },
+        {
+          "career_id": "project-manager",
+          "title": "Project Manager",
+          "score": 0.5208
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.4927
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4715
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.4503
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 1.0
+        },
+        {
+          "career_id": "project-manager",
+          "title": "Project Manager",
+          "score": 0.5208
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.4927
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4715
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.4503
+        }
+      ]
+    },
+    {
+      "student_id": "stu-005",
+      "name": "Eko",
+      "declared_interest": "network-engineer",
+      "declared_relative_score": null,
+      "best_alt_id": "site-reliability-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": null,
+      "status": "Strong Fit (No Declared Interest)",
+      "rationale": "Karier terbaik sangat sesuai (relative_score=1.000 >= 0.7).",
+      "skill_gap": null,
+      "rankings": [
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.8154
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.7475
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.7297
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.71
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.8154
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.7475
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.7297
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.71
+        }
+      ]
+    },
+    {
+      "student_id": "stu-006",
+      "name": "Fani",
+      "declared_interest": "data-scientist",
+      "declared_relative_score": 0.1811,
+      "best_alt_id": "hr-specialist",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.8189,
+      "status": "Major Drift",
+      "rationale": "Minat yang dideklarasikan kurang sesuai (relative_score=0.181 < 0.4), sementara alternatif 'hr-specialist' jauh lebih cocok (relative_score=1.000 >= 0.4).",
+      "skill_gap": {
+        "matched_skills": [],
+        "missing_skills": [
+          {
+            "skill": "Data Modeling",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Feature Engineering",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Machine Learning",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "NumPy",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Pandas",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Python",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Statistics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TensorFlow",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "scikit-learn",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.0,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "hr-specialist",
+          "title": "Human Resource Specialist",
+          "score": 1.0
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4322
+        },
+        {
+          "career_id": "accountant",
+          "title": "Accountant",
+          "score": 0.3544
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.3225
+        },
+        {
+          "career_id": "financial-analyst",
+          "title": "Financial Analyst",
+          "score": 0.3036
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "hr-specialist",
+          "title": "Human Resource Specialist",
+          "score": 1.0
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.4322
+        },
+        {
+          "career_id": "accountant",
+          "title": "Accountant",
+          "score": 0.3544
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.3225
+        },
+        {
+          "career_id": "financial-analyst",
+          "title": "Financial Analyst",
+          "score": 0.3036
+        }
+      ]
+    },
+    {
+      "student_id": "stu-007",
+      "name": "Gita",
+      "declared_interest": "mobile-engineer",
+      "declared_relative_score": null,
+      "best_alt_id": "frontend-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": null,
+      "status": "Strong Fit (No Declared Interest)",
+      "rationale": "Karier terbaik sangat sesuai (relative_score=1.000 >= 0.7).",
+      "skill_gap": null,
+      "rankings": [
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9381
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6366
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.6124
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.5923
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9381
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6366
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.6124
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.5923
+        }
+      ]
+    },
+    {
+      "student_id": "stu-008",
+      "name": "Hadi",
+      "declared_interest": "software-engineer",
+      "declared_relative_score": 0.6559,
+      "best_alt_id": "devops-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.3441,
+      "status": "Minor Drift",
+      "rationale": "Minat yang dideklarasikan cukup sesuai (relative_score=0.656 >= 0.4), namun alternatif 'devops-engineer' lebih cocok (norm_adv=0.344 > 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "CI/CD",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "CI/CD",
+            "context": "on-premise dan cloud. Familiar dengan Docker, Ansible, Prometheus, Grafana, dan CI/CD pipeline menggunakan Jenkins. Pernah menangani incident production dan menyusun",
+            "section": "other",
+            "cv_span": [
+              138,
+              143
+            ]
+          },
+          {
+            "skill": "Docker",
+            "similarity": 0.95,
+            "source": "lexical",
+            "evidence": "Docker",
+            "context": "ator Linux berpengalaman mengelola server on-premise dan cloud. Familiar dengan Docker, Ansible, Prometheus, Grafana, dan CI/CD pipeline menggunakan Jenkins. Pernah m",
+            "section": "other",
+            "cv_span": [
+              96,
+              102
+            ]
+          },
+          {
+            "skill": "Cloud Basics",
+            "similarity": 0.5111,
+            "source": "semantic",
+            "evidence": "System administrator Linux berpengalaman mengelola server on-premise dan cloud.",
+            "context": "System administrator Linux berpengalaman mengelola server on-premise dan cloud.",
+            "section": "other",
+            "cv_span": [
+              0,
+              79
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Algorithms",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Data Structures",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Debugging",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Git",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Java",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Microservices",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OOP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Python",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "REST API",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "System Design",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TypeScript",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Unit Testing",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.2,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "CI/CD",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "CI/CD",
+            "cv_span": [
+              138,
+              143
+            ],
+            "context": "on-premise dan cloud. Familiar dengan Docker, Ansible, Prometheus, Grafana, dan CI/CD pipeline menggunakan Jenkins. Pernah menangani incident production dan menyusun",
+            "section": "other"
+          },
+          {
+            "canonical": "Docker",
+            "source": "lexical",
+            "confidence": 0.95,
+            "matched_text": "Docker",
+            "cv_span": [
+              96,
+              102
+            ],
+            "context": "ator Linux berpengalaman mengelola server on-premise dan cloud. Familiar dengan Docker, Ansible, Prometheus, Grafana, dan CI/CD pipeline menggunakan Jenkins. Pernah m",
+            "section": "other"
+          },
+          {
+            "canonical": "Cloud Basics",
+            "source": "semantic",
+            "confidence": 0.5111,
+            "matched_text": "System administrator Linux berpengalaman mengelola server on-premise dan cloud.",
+            "cv_span": [
+              0,
+              79
+            ],
+            "context": "System administrator Linux berpengalaman mengelola server on-premise dan cloud.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.9613
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.6855
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6559
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.5321
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.9613
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.6855
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6559
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.5321
+        }
+      ]
+    },
+    {
+      "student_id": "stu-009",
+      "name": "Ika",
+      "declared_interest": "product-manager",
+      "declared_relative_score": 0.6446,
+      "best_alt_id": "digital-marketer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.3554,
+      "status": "Minor Drift",
+      "rationale": "Minat yang dideklarasikan cukup sesuai (relative_score=0.645 >= 0.4), namun alternatif 'digital-marketer' lebih cocok (norm_adv=0.355 > 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Stakeholder Management",
+            "similarity": 0.5439,
+            "source": "semantic",
+            "evidence": "Latar belakang manajemen pemasaran.",
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other",
+            "cv_span": [
+              0,
+              35
+            ]
+          },
+          {
+            "skill": "Market Analysis",
+            "similarity": 0.5143,
+            "source": "semantic",
+            "evidence": "Latar belakang manajemen pemasaran.",
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other",
+            "cv_span": [
+              0,
+              35
+            ]
+          },
+          {
+            "skill": "Product Roadmap",
+            "similarity": 0.5057,
+            "source": "semantic",
+            "evidence": "Latar belakang manajemen pemasaran.",
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other",
+            "cv_span": [
+              0,
+              35
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Agile",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Jira",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "KPI",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Scrum",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "User Research",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.375,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Stakeholder Management",
+            "source": "semantic",
+            "confidence": 0.5439,
+            "matched_text": "Latar belakang manajemen pemasaran.",
+            "cv_span": [
+              0,
+              35
+            ],
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other"
+          },
+          {
+            "canonical": "Market Analysis",
+            "source": "semantic",
+            "confidence": 0.5143,
+            "matched_text": "Latar belakang manajemen pemasaran.",
+            "cv_span": [
+              0,
+              35
+            ],
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other"
+          },
+          {
+            "canonical": "Product Roadmap",
+            "source": "semantic",
+            "confidence": 0.5057,
+            "matched_text": "Latar belakang manajemen pemasaran.",
+            "cv_span": [
+              0,
+              35
+            ],
+            "context": "Latar belakang manajemen pemasaran.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 1.0
+        },
+        {
+          "career_id": "data-analyst",
+          "title": "Data Analyst",
+          "score": 0.6801
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.6446
+        },
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 0.5598
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.5162
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 1.0
+        },
+        {
+          "career_id": "data-analyst",
+          "title": "Data Analyst",
+          "score": 0.6801
+        },
+        {
+          "career_id": "product-manager",
+          "title": "Product Manager",
+          "score": 0.6446
+        },
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 0.5598
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.5162
+        }
+      ]
+    },
+    {
+      "student_id": "stu-010",
+      "name": "Joko",
+      "declared_interest": "software-engineer",
+      "declared_relative_score": 1.0,
+      "best_alt_id": "backend-engineer",
+      "best_alt_relative_score": 0.9166,
+      "relative_advantage": -0.0834,
+      "status": "Aligned",
+      "rationale": "Minat yang dideklarasikan sangat sesuai (relative_score=1.000 >= 0.7). Tidak ada alternatif dengan keunggulan signifikan (norm_adv=-0.083 <= 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "REST API",
+            "similarity": 0.5155,
+            "source": "semantic",
+            "evidence": "Menulis automated test menggunakan Selenium dan Cypress, melakukan API testing d",
+            "context": "Menulis automated test menggunakan Selenium dan Cypress, melakukan API testing dengan Postman, serta menjalankan regression test secara rutin.",
+            "section": "other",
+            "cv_span": [
+              57,
+              199
+            ]
+          },
+          {
+            "skill": "Unit Testing",
+            "similarity": 0.5059,
+            "source": "semantic",
+            "evidence": "Familiar dengan Jira dan TestRail.",
+            "context": "Familiar dengan Jira dan TestRail.",
+            "section": "other",
+            "cv_span": [
+              200,
+              234
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Algorithms",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "CI/CD",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Cloud Basics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Data Structures",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Debugging",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Docker",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Git",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Java",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Microservices",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OOP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Python",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "System Design",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TypeScript",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.1333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "REST API",
+            "source": "semantic",
+            "confidence": 0.5155,
+            "matched_text": "Menulis automated test menggunakan Selenium dan Cypress, melakukan API testing d",
+            "cv_span": [
+              57,
+              199
+            ],
+            "context": "Menulis automated test menggunakan Selenium dan Cypress, melakukan API testing dengan Postman, serta menjalankan regression test secara rutin.",
+            "section": "other"
+          },
+          {
+            "canonical": "Unit Testing",
+            "source": "semantic",
+            "confidence": 0.5059,
+            "matched_text": "Familiar dengan Jira dan TestRail.",
+            "cv_span": [
+              200,
+              234
+            ],
+            "context": "Familiar dengan Jira dan TestRail.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9166
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.7401
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.6603
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.5405
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9166
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.7401
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.6603
+        },
+        {
+          "career_id": "business-intelligence-analyst",
+          "title": "Business Intelligence Analyst",
+          "score": 0.5405
+        }
+      ]
+    },
+    {
+      "student_id": "stu-011",
+      "name": "Karin",
+      "declared_interest": "machine-learning-engineer",
+      "declared_relative_score": null,
+      "best_alt_id": "data-scientist",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": null,
+      "status": "Strong Fit (No Declared Interest)",
+      "rationale": "Karier terbaik sangat sesuai (relative_score=1.000 >= 0.7).",
+      "skill_gap": null,
+      "rankings": [
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 1.0
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6443
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.4892
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.4853
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.4779
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 1.0
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.6443
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.4892
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.4853
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.4779
+        }
+      ]
+    },
+    {
+      "student_id": "stu-012",
+      "name": "Lina",
+      "declared_interest": "cybersecurity-analyst",
+      "declared_relative_score": 0.6204,
+      "best_alt_id": "devops-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.3796,
+      "status": "Minor Drift",
+      "rationale": "Minat yang dideklarasikan cukup sesuai (relative_score=0.620 >= 0.4), namun alternatif 'devops-engineer' lebih cocok (norm_adv=0.380 > 0.1).",
+      "skill_gap": {
+        "matched_skills": [],
+        "missing_skills": [
+          {
+            "skill": "Firewall",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Incident Response",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "NIST",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Network Security",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OWASP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Penetration Testing",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "SIEM",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Threat Analysis",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Vulnerability Assessment",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.0,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.8164
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.8059
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.7365
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.6204
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "site-reliability-engineer",
+          "title": "Site Reliability Engineer",
+          "score": 0.8164
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.8059
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.7365
+        },
+        {
+          "career_id": "cybersecurity-analyst",
+          "title": "Cybersecurity Analyst",
+          "score": 0.6204
+        }
+      ]
+    },
+    {
+      "student_id": "stu-013",
+      "name": "Made",
+      "declared_interest": "software-engineer",
+      "declared_relative_score": 0.3125,
+      "best_alt_id": "graphic-designer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.6875,
+      "status": "Major Drift",
+      "rationale": "Minat yang dideklarasikan kurang sesuai (relative_score=0.312 < 0.4), sementara alternatif 'graphic-designer' jauh lebih cocok (relative_score=1.000 >= 0.4).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Algorithms",
+            "similarity": 0.5002,
+            "source": "semantic",
+            "evidence": "Belum memiliki pengalaman di bidang pemrograman atau teknologi informasi.",
+            "context": "Belum memiliki pengalaman di bidang pemrograman atau teknologi informasi.",
+            "section": "other",
+            "cv_span": [
+              129,
+              202
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "CI/CD",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Cloud Basics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Data Structures",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Debugging",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Docker",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Git",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Java",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Microservices",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OOP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Python",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "REST API",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "System Design",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TypeScript",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Unit Testing",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.0667,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Algorithms",
+            "source": "semantic",
+            "confidence": 0.5002,
+            "matched_text": "Belum memiliki pengalaman di bidang pemrograman atau teknologi informasi.",
+            "cv_span": [
+              129,
+              202
+            ],
+            "context": "Belum memiliki pengalaman di bidang pemrograman atau teknologi informasi.",
+            "section": "other"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 1.0
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.5904
+        },
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 0.5717
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.403
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.3442
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "graphic-designer",
+          "title": "Graphic Designer",
+          "score": 1.0
+        },
+        {
+          "career_id": "ui-ux-designer",
+          "title": "UI/UX Designer",
+          "score": 0.5904
+        },
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 0.5717
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.403
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.3442
+        }
+      ]
+    },
+    {
+      "student_id": "stu-014",
+      "name": "Nanda",
+      "declared_interest": "data-scientist",
+      "declared_relative_score": 0.527,
+      "best_alt_id": "backend-engineer",
+      "best_alt_relative_score": 1.0,
+      "relative_advantage": 0.473,
+      "status": "Minor Drift",
+      "rationale": "Minat yang dideklarasikan cukup sesuai (relative_score=0.527 >= 0.4), namun alternatif 'backend-engineer' lebih cocok (norm_adv=0.473 > 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Python",
+            "similarity": 0.98,
+            "source": "lexical",
+            "evidence": "Python",
+            "context": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python dan SQL. Familiar dengan PostgreSQL, Redis, dan membuat API untuk reporting das",
+            "section": "experience",
+            "cv_span": [
+              72,
+              78
+            ]
+          },
+          {
+            "skill": "Data Modeling",
+            "similarity": 0.5308,
+            "source": "semantic",
+            "evidence": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python d",
+            "context": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python dan SQL.",
+            "section": "other",
+            "cv_span": [
+              0,
+              87
+            ]
+          },
+          {
+            "skill": "Machine Learning",
+            "similarity": 0.5102,
+            "source": "semantic",
+            "evidence": "Pernah magang di tim data engineering startup.",
+            "context": "Pernah magang di tim data engineering startup.",
+            "section": "experience",
+            "cv_span": [
+              166,
+              212
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Feature Engineering",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "NumPy",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Pandas",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Statistics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TensorFlow",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "scikit-learn",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.3333,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Python",
+            "source": "lexical",
+            "confidence": 0.98,
+            "matched_text": "Python",
+            "cv_span": [
+              72,
+              78
+            ],
+            "context": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python dan SQL. Familiar dengan PostgreSQL, Redis, dan membuat API untuk reporting das",
+            "section": "experience"
+          },
+          {
+            "canonical": "Data Modeling",
+            "source": "semantic",
+            "confidence": 0.5308,
+            "matched_text": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python d",
+            "cv_span": [
+              0,
+              87
+            ],
+            "context": "Backend developer dengan pengalaman membangun data pipeline menggunakan Python dan SQL.",
+            "section": "other"
+          },
+          {
+            "canonical": "Machine Learning",
+            "source": "semantic",
+            "confidence": 0.5102,
+            "matched_text": "Pernah magang di tim data engineering startup.",
+            "cv_span": [
+              166,
+              212
+            ],
+            "context": "Pernah magang di tim data engineering startup.",
+            "section": "experience"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.7333
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.654
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.537
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.527
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.7333
+        },
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 0.654
+        },
+        {
+          "career_id": "devops-engineer",
+          "title": "DevOps Engineer",
+          "score": 0.537
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.527
+        }
+      ]
+    },
+    {
+      "student_id": "stu-015",
+      "name": "Omar",
+      "declared_interest": "software-engineer",
+      "declared_relative_score": 1.0,
+      "best_alt_id": "backend-engineer",
+      "best_alt_relative_score": 0.9856,
+      "relative_advantage": -0.0144,
+      "status": "Aligned",
+      "rationale": "Minat yang dideklarasikan sangat sesuai (relative_score=1.000 >= 0.7). Tidak ada alternatif dengan keunggulan signifikan (norm_adv=-0.014 <= 0.1).",
+      "skill_gap": {
+        "matched_skills": [
+          {
+            "skill": "Python",
+            "similarity": 0.98,
+            "source": "lexical",
+            "evidence": "Python",
+            "context": "kuliah pilihan dari berbagai jurusan. Sedikit pengalaman di desain web, sedikit Python, pernah bantu admin medsos organisasi kampus. Belum ada pengalaman magang atau",
+            "section": "experience",
+            "cv_span": [
+              132,
+              138
+            ]
+          }
+        ],
+        "missing_skills": [
+          {
+            "skill": "Algorithms",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "CI/CD",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Cloud Basics",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Data Structures",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Debugging",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Docker",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Git",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Java",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Microservices",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "OOP",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "REST API",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "System Design",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "TypeScript",
+            "similarity": 0.0,
+            "type": "new"
+          },
+          {
+            "skill": "Unit Testing",
+            "similarity": 0.0,
+            "type": "new"
+          }
+        ],
+        "match_ratio": 0.0667,
+        "outdated_in_cv": [],
+        "extracted_skills_in_cv": [
+          {
+            "canonical": "Python",
+            "source": "lexical",
+            "confidence": 0.98,
+            "matched_text": "Python",
+            "cv_span": [
+              132,
+              138
+            ],
+            "context": "kuliah pilihan dari berbagai jurusan. Sedikit pengalaman di desain web, sedikit Python, pernah bantu admin medsos organisasi kampus. Belum ada pengalaman magang atau",
+            "section": "experience"
+          }
+        ],
+        "extra_cv_skills": []
+      },
+      "rankings": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9856
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.9593
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.9085
+        },
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 0.7559
+        }
+      ],
+      "recommendations": [
+        {
+          "career_id": "software-engineer",
+          "title": "Software Engineer",
+          "score": 1.0
+        },
+        {
+          "career_id": "backend-engineer",
+          "title": "Backend Engineer",
+          "score": 0.9856
+        },
+        {
+          "career_id": "frontend-engineer",
+          "title": "Frontend Engineer",
+          "score": 0.9593
+        },
+        {
+          "career_id": "data-scientist",
+          "title": "Data Scientist",
+          "score": 0.9085
+        },
+        {
+          "career_id": "digital-marketer",
+          "title": "Digital Marketer",
+          "score": 0.7559
+        }
+      ]
+    }
+  ]
+}
