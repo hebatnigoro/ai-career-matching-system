@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+venv/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# Editor / workspace
+*.code-workspace
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local tooling
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# Node
+node_modules/
+.next/
