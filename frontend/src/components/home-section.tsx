@@ -49,7 +49,7 @@ export function HomeSection({ navigate, mouse }: Props) {
             <CBtn big onClick={() => navigate("how")} accent="var(--pd-card)" textColor="var(--pd-text)">📖 How It Works</CBtn>
           </div>
           <div style={{ ...T(640), display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {([["50+", "Career Profiles", "💼"], ["BERT", "Embeddings", "🤖"], ["Gemini", "AI Plans", "✨"]] as const).map(([v, l, ic], i) => (
+            {([["20+", "Career Profiles", "💼"], ["BERT", "Embeddings", "🤖"], ["Gemini", "AI Plans", "✨"]] as const).map(([v, l, ic], i) => (
               <div key={i} style={{ background: "var(--pd-card)", border: "2.5px solid #1e1a3a", borderRadius: 14, padding: "10px 16px", boxShadow: "3px 3px 0 #1e1a3a", textAlign: "center", minWidth: 84 }}>
                 <div style={{ fontSize: 18, marginBottom: 2 }}>{ic}</div>
                 <div style={{ fontWeight: 900, fontSize: 16, color: "#0EA5E9" }}>{v}</div>
